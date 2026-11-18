@@ -1,0 +1,2495 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=749f3973-c670-4db1-b417-9687c8579808
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>梁山点算司 · 水浒材料计算器</title>
+    <style>
+
+:root{
+  --ink:#12100f; --ink2:#1b1714; --ink3:#241f1b;
+  --paper:#f2e5c8; --gold:#d8a72b; --gold2:#8f6d1c;
+  --red:#b02b2b; --red2:#7d1c1c; --jade:#2f6b5f; --muted:#a99574;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:18px 12px 40px; min-height:100vh;
+  color:var(--paper); font-family:"Noto Serif SC","Songti SC","STSong",serif;
+  background:
+    radial-gradient(900px 480px at 50% -10%, #2a2118 0%, transparent 62%),
+    linear-gradient(160deg,#171310 0%,#0d0b0a 100%);
+  position:relative;
+}
+body::before{
+  content:""; position:fixed; inset:0; pointer-events:none; opacity:.10;
+  background-image:repeating-radial-gradient(circle at 50% 118%, transparent 0 40px, #d8a72b 41px 42px);
+  -webkit-mask-image:linear-gradient(to top,#000 0%,transparent 60%);
+  mask-image:linear-gradient(to top,#000 0%,transparent 60%);
+}
+.container{max-width:820px;margin:0 auto;position:relative;z-index:2}
+/* 页头 */
+.liangshan-head{
+  display:flex;align-items:center;gap:12px;margin:4px 2px 18px;
+  border-bottom:1px solid rgba(216,167,43,.28);padding-bottom:12px;
+}
+.liangshan-seal{
+  width:52px;height:52px;flex:0 0 52px;border-radius:11px;
+  background:linear-gradient(145deg,var(--red),var(--red2));
+  color:#f6e7c6;display:grid;place-items:center;font-weight:700;font-size:15px;line-height:1.1;
+  text-align:center;letter-spacing:1px;box-shadow:inset 0 0 0 2px rgba(246,231,198,.55);
+}
+.liangshan-head h1{margin:0 0 3px;font-size:20px;letter-spacing:3px;color:#f0d38c;font-weight:600}
+.liangshan-head p{margin:0;font-size:12px;color:var(--muted);letter-spacing:1px}
+/* 标签页 */
+.tab-container{
+  display:flex;background:rgba(28,24,21,.9);border:1px solid rgba(216,167,43,.25);
+  border-radius:14px;overflow:hidden;margin-bottom:18px;box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+.tab-button{
+  flex:1;padding:15px 0;border:none;background:transparent;cursor:pointer;
+  color:#a99574;font-size:15px;font-family:inherit;letter-spacing:1px;transition:all .18s;
+}
+.tab-button:hover{color:#f0d38c;background:rgba(216,167,43,.08)}
+.tab-button.active{
+  color:#1a1512;font-weight:700;
+  background:linear-gradient(180deg,#e8c372,#c79428);
+  box-shadow:inset 0 0 0 1px rgba(246,231,198,.5);
+}
+/* 卡片 */
+.calculator-container{
+  background:linear-gradient(180deg,rgba(30,26,22,.97),rgba(19,16,14,.98));
+  border:1px solid rgba(216,167,43,.32);border-radius:18px;padding:20px 18px;
+  box-shadow:0 18px 60px rgba(0,0,0,.6), inset 0 0 0 6px rgba(216,167,43,.05);
+  position:relative;overflow:hidden;
+}
+.calculator-container::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,#d8a72b,transparent);opacity:.75;
+}
+.main-title{
+  text-align:center;font-size:20px;letter-spacing:2px;color:#f0d38c;font-weight:600;
+  margin:2px 0 18px;padding-bottom:12px;border-bottom:1px solid rgba(216,167,43,.18);position:relative;
+}
+.main-title::after{
+  content:"替天行道";position:absolute;right:0;bottom:10px;font-size:10px;letter-spacing:2px;
+  color:rgba(216,167,43,.35);
+}
+.card{
+  background:rgba(255,255,255,.025);border:1px solid rgba(216,167,43,.16);
+  border-radius:14px;padding:14px 14px 6px;margin-bottom:14px;position:relative;
+}
+.card::before{
+  content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;
+  background:linear-gradient(180deg,var(--gold),transparent);
+}
+.card-title{
+  font-size:15px;letter-spacing:1.5px;color:#e6c983;font-weight:600;
+  margin:0 0 12px;padding-bottom:8px;border-bottom:1px dashed rgba(216,167,43,.18);
+}
+.flex-container{display:flex;gap:14px;flex-wrap:wrap}
+.flex-item{flex:1 1 240px;min-width:0}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:#cdb894;margin-bottom:7px;letter-spacing:.5px}
+.form-control{
+  width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(216,167,43,.2);
+  background:rgba(0,0,0,.35);color:#f2e5c8;font-family:ui-monospace,Menlo,monospace;font-size:15px;
+  outline:none;transition:.18s;
+}
+.form-control:focus{border-color:rgba(216,167,43,.65);box-shadow:0 0 0 3px rgba(216,167,43,.12)}
+select.form-control{font-family:inherit}
+.form-hint{font-size:11.5px;color:#8d7a5c;margin-top:6px;letter-spacing:.4px}
+.form-hint i{display:none}
+.btn-group{display:flex;gap:12px;margin:18px 0}
+.btn{
+  flex:1;padding:15px 0;border-radius:12px;border:1px solid rgba(216,167,43,.3);
+  cursor:pointer;font-size:16px;font-family:inherit;letter-spacing:2px;
+  transition:transform .06s,box-shadow .18s,background .18s;
+  box-shadow:0 4px 0 rgba(0,0,0,.5);
+}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.btn-calc{background:linear-gradient(180deg,var(--red),var(--red2));color:#f7e9c8;font-weight:700}
+.btn-reset{background:linear-gradient(180deg,#2a3f3a,#1b2a27);color:#bfe0d4}
+/* 结果 */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin:6px 0 12px}
+.result-item{
+  background:rgba(0,0,0,.3);border:1px solid rgba(216,167,43,.14);
+  border-radius:12px;padding:14px 8px 12px;text-align:center;position:relative;overflow:hidden;
+}
+.result-item::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5;
+}
+.result-label{font-size:12px;color:#a99574;letter-spacing:1px;margin-bottom:8px}
+.result-value{
+  font-family:ui-monospace,Menlo,monospace;font-size:22px;font-weight:700;color:#f0d38c;
+  text-shadow:0 0 16px rgba(216,167,43,.25);word-break:break-all;
+}
+.tip-box{
+  background:rgba(47,107,95,.14);border-left:3px solid var(--jade);
+  padding:12px 14px;margin:0 0 14px;font-size:12px;color:#a9c9bf;border-radius:0 10px 10px 0;line-height:1.6;
+}
+.tip-box i{display:none}
+/* 材料色 */
+.grass,.wood,.pill,.yangyan,.changsheng,.shengren,.yunmu,.wujin,.jingang,.heiyao{
+  color:#f0d38c !important;
+}
+.small-package,.big-package{color:#e8c372 !important}
+.liangshan-foot{
+  margin-top:20px;display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;color:#7d6b50;letter-spacing:1px;
+}
+.liangshan-foot .stars{color:#c9a34a;letter-spacing:2px}
+@media (max-width:520px){
+  .flex-container{flex-direction:column}
+  .tab-button{font-size:13px;padding:13px 0}
+  .result-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+</style>
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    
+
+
+    <div class="container">
+        <div class="liangshan-head">
+            <div class="liangshan-seal">替天<br/>行道</div>
+            <div>
+                <h1>梁山点算司</h1>
+                <p>神兽 · 神装 · 军师 · 祭坛 —— 一百单八将，账目分明</p>
+            </div>
+        </div>
+
+        <!-- 高级选项卡 -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="beast" id="tab-beast">神兽计算器</button>
+            <button class="tab-button" data-tab="armor" id="tab-armor">神装计算器</button>
+            <button class="tab-button" data-tab="advisor" id="tab-advisor">军师计算器</button>
+            <button class="tab-button" data-tab="altar" id="tab-altar">祭坛计算器</button>
+        </div>
+
+        <!-- 神兽计算器 -->
+        <div id="beast-calculator" class="tab-content active">
+            <div class="calculator-container">
+                <div class="calculator-content">
+                    <h1 class="main-title">神兽材料计算器</h1>
+                    
+                    <!-- 等级和材料包并排布局 -->
+                    <div class="flex-container">
+                        <!-- 等级经验 -->
+                        <div class="card flex-item">
+                            <div class="card-title">等级</div>
+                            <div class="form-group">
+                                <label for="beast-current-level">当前等级 *</label>
+                                <input type="number" autocomplete="off" id="beast-current-level" class="form-control" value="1" min="1" max="79" autocomplete="off">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：1 - 79</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-current-exp">当前经验值 *</label>
+                                <input type="number" autocomplete="off" id="beast-current-exp" class="form-control" value="0" min="0">
+                                <div class="form-hint" id="beast-exp-hint"><i class="fas fa-info-circle"></i> 1级升2级需20经验</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-target-level">目标等级 *</label>
+                                <input type="number" autocomplete="off" id="beast-target-level" class="form-control" value="80" min="2" max="80">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：2 - 80</div>
+                            </div>
+                        </div>
+
+                        <!-- 材料包 -->
+                        <div class="card flex-item">
+                            <div class="card-title">材料包</div>
+                            <div class="tip-box">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-small-grass">材料包-灵草数量/包</label>
+                                <input type="number" autocomplete="off" id="beast-small-grass" class="form-control" value="91" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-small-wood">材料包-灵木数量/包</label>
+                                <input type="number" autocomplete="off" id="beast-small-wood" class="form-control" value="39" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-small-pill">材料包-灵丹数量/包</label>
+                                <input type="number" autocomplete="off" id="beast-small-pill" class="form-control" value="21" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-big-to-small">限时包-可兑换神兽材料包数量/包</label>
+                                <input type="number" autocomplete="off" id="beast-big-to-small" class="form-control" value="80" min="1">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 例：1个限时包换1000个小包，填1000</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-big-price">限时包单价/元</label>
+                                <input type="number" autocomplete="off" id="beast-big-price" class="form-control" value="0" min="0" step="0.01">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 单个限时包的价格</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="beast-rebate-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span style="margin-bottom: 0;">启用活动返利计算</span>
+                                </label>
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 活动期间消耗材料获积分，积分可兑换材料</div>
+                            </div>
+                        </div>
+                        <div class="card flex-item" id="beast-rebate-settings" style="display: none;">
+                            <div class="card-title">活动上限设置</div>
+                            <div class="form-group">
+                                <label for="beast-max-points">积分上限</label>
+                                <input type="number" autocomplete="off" id="beast-max-points" class="form-control" value="6750000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-grass-max">灵草兑换上限</label>
+                                <input type="number" autocomplete="off" id="beast-grass-max" class="form-control" value="120000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-wood-max">灵木兑换上限</label>
+                                <input type="number" autocomplete="off" id="beast-wood-max" class="form-control" value="75000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="beast-pill-max">灵丹兑换上限</label>
+                                <input type="number" autocomplete="off" id="beast-pill-max" class="form-control" value="52500" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算按钮 -->
+                    <div class="btn-group">
+                        <button class="btn btn-calc" id="beast-calc-btn">计算</button>
+                        <button class="btn btn-reset" id="beast-reset-btn">重置</button>
+                    </div>
+
+                    <!-- 所需基础材料 -->
+                    <div class="card">
+                        <div class="card-title">总计所需基础材料</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">灵草</div>
+                                <div class="result-value grass" id="beast-total-grass">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">灵木</div>
+                                <div class="result-value wood" id="beast-total-wood">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">灵丹</div>
+                                <div class="result-value pill" id="beast-total-pill">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 材料包 -->
+                    <div class="card">
+                        <div class="card-title">所需材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">灵草包数</div>
+                                <div class="result-value small-package" id="beast-grass-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">灵木包数</div>
+                                <div class="result-value small-package" id="beast-wood-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">灵丹包数</div>
+                                <div class="result-value small-package" id="beast-pill-small">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 限时包需求 -->
+                    <div class="card">
+                        <div class="card-title">所需限时包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">总需限时包数</div>
+                                <div class="result-value big-package" id="beast-total-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">总价格(元)</div>
+                                <div class="result-value" id="beast-total-price" style="color: #f97316;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 活动返利结果 -->
+                    <div class="card" id="beast-rebate-card" style="display: none;">
+                        <div class="card-title">活动返利计算结果</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">获得总积分</div>
+                                <div class="result-value" id="beast-total-points">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利灵草</div>
+                                <div class="result-value grass" id="beast-rebate-grass">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利灵木</div>
+                                <div class="result-value wood" id="beast-rebate-wood">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利灵丹</div>
+                                <div class="result-value pill" id="beast-rebate-pill">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后限时包数</div>
+                                <div class="result-value big-package" id="beast-rebate-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省限时包数</div>
+                                <div class="result-value" id="beast-saved-big" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后价格(元)</div>
+                                <div class="result-value" id="beast-rebate-price" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省金额(元)</div>
+                                <div class="result-value" id="beast-saved-price" style="color: #10b981;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 神装计算器 -->
+        <div id="armor-calculator" class="tab-content">
+            <div class="calculator-container">
+                <div class="calculator-content">
+                    <h1 class="main-title">神装材料计算器</h1>
+                    
+                    <!-- 等级和材料包并排布局 -->
+                    <div class="flex-container">
+                        <!-- 等级参数 -->
+                        <div class="card flex-item">
+                            <div class="card-title">等级</div>
+                            <div class="form-group">
+                                <label for="armor-current-level">当前等级 *</label>
+                                <input type="number" autocomplete="off" id="armor-current-level" class="form-control" value="1" min="1" max="59">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：1 - 59</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-current-exp">当前经验值 *</label>
+                                <input type="number" autocomplete="off" id="armor-current-exp" class="form-control" value="0" min="0">
+                                <div class="form-hint" id="armor-exp-hint"><i class="fas fa-info-circle"></i> 1级升2级需要15经验</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-target-level">目标等级 *</label>
+                                <input type="number" autocomplete="off" id="armor-target-level" class="form-control" value="60" min="2" max="60">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：2 - 60</div>
+                            </div>
+                        </div>
+
+                        <!-- 材料包 -->
+                        <div class="card flex-item">
+                            <div class="card-title">材料包</div>
+                            <div class="tip-box">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-small-yunmu">材料包-云母石数量/包</label>
+                                <input type="number" autocomplete="off" id="armor-small-yunmu" class="form-control" value="10" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-small-wujin">材料包-乌金石数量/包</label>
+                                <input type="number" autocomplete="off" id="armor-small-wujin" class="form-control" value="5" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-small-jingang">材料包-金刚石数量/包</label>
+                                <input type="number" autocomplete="off" id="armor-small-jingang" class="form-control" value="2" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-small-heiyao">小材料包-黑曜石数量/包</label>
+                                <input type="number" autocomplete="off" id="armor-small-heiyao" class="form-control" value="1.25" min="0.1" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-big-to-small">限时包-可兑换神装材料包数量/包</label>
+                                <input type="number" autocomplete="off" id="armor-big-to-small" class="form-control" value="1000" min="1">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 例：1个限时包换1000个小包，填1000</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-big-price">限时包单价/元</label>
+                                <input type="number" autocomplete="off" id="armor-big-price" class="form-control" value="0" min="0" step="0.01">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 单个限时包的价格</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="armor-rebate-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span style="margin-bottom: 0;">启用活动返利计算</span>
+                                </label>
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 活动期间消耗材料获积分，积分可兑换材料</div>
+                            </div>
+                        </div>
+                        <div class="card flex-item" id="armor-rebate-settings" style="display: none;">
+                            <div class="card-title">活动上限设置</div>
+                            <div class="form-group">
+                                <label for="armor-max-points">积分上限</label>
+                                <input type="number" autocomplete="off" id="armor-max-points" class="form-control" value="6450000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-yunmu-max">云母石兑换上限</label>
+                                <input type="number" autocomplete="off" id="armor-yunmu-max" class="form-control" value="105000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-wujin-max">乌金石兑换上限</label>
+                                <input type="number" autocomplete="off" id="armor-wujin-max" class="form-control" value="67500" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-jingang-max">金刚石兑换上限</label>
+                                <input type="number" autocomplete="off" id="armor-jingang-max" class="form-control" value="34500" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="armor-heiyao-max">黑曜石兑换上限</label>
+                                <input type="number" autocomplete="off" id="armor-heiyao-max" class="form-control" value="15000" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算按钮 -->
+                    <div class="btn-group">
+                        <button class="btn btn-calc" id="armor-calc-btn">计算</button>
+                        <button class="btn btn-reset" id="armor-reset-btn">重置</button>
+                    </div>
+
+                    <!-- 所需基础材料 -->
+                    <div class="card">
+                        <div class="card-title">总计所需基础材料</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">云母石</div>
+                                <div class="result-value yunmu" id="armor-total-yunmu">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">乌金石</div>
+                                <div class="result-value wujin" id="armor-total-wujin">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">金刚石</div>
+                                <div class="result-value jingang" id="armor-total-jingang">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">黑曜石</div>
+                                <div class="result-value heiyao" id="armor-total-heiyao">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 小材料包 -->
+                    <div class="card">
+                        <div class="card-title">所需材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">云母石包数</div>
+                                <div class="result-value small-package" id="armor-yunmu-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">乌金石包数</div>
+                                <div class="result-value small-package" id="armor-wujin-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">金刚石包数</div>
+                                <div class="result-value small-package" id="armor-jingang-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">黑曜石包数</div>
+                                <div class="result-value small-package" id="armor-heiyao-small">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 限时包 -->
+                    <div class="card">
+                        <div class="card-title">所需限时包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">总需限时包数</div>        
+                                <div class="result-value big-package" id="armor-total-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">总价格(元)</div>
+                                <div class="result-value" id="armor-total-price" style="color: #f97316;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 活动返利结果 -->
+                    <div class="card" id="armor-rebate-card" style="display: none;">
+                        <div class="card-title">活动返利计算结果</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">获得总积分</div>
+                                <div class="result-value" id="armor-total-points">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利云母石</div>
+                                <div class="result-value yunmu" id="armor-rebate-yunmu">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利乌金石</div>
+                                <div class="result-value wujin" id="armor-rebate-wujin">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利金刚石</div>
+                                <div class="result-value jingang" id="armor-rebate-jingang">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利黑曜石</div>
+                                <div class="result-value heiyao" id="armor-rebate-heiyao">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后限时包数</div>
+                                <div class="result-value big-package" id="armor-rebate-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省限时包数</div>
+                                <div class="result-value" id="armor-saved-big" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后价格(元)</div>
+                                <div class="result-value" id="armor-rebate-price" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省金额(元)</div>
+                                <div class="result-value" id="armor-saved-price" style="color: #10b981;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 军师计算器 -->
+        <div id="advisor-calculator" class="tab-content">
+            <div class="calculator-container">
+                <div class="calculator-content">
+                    <h1 class="main-title">军师材料计算器</h1>
+                    
+                    <!-- 等级和材料包并排布局 -->
+                    <div class="flex-container">
+                        <!-- 等级 -->
+                        <div class="card flex-item">
+                            <div class="card-title">等级</div>
+                            <div class="form-group">
+                                <label for="advisor-current-level">当前等级 *</label>
+                                <input type="number" autocomplete="off" id="advisor-current-level" class="form-control" value="1" min="1" max="59">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：1 - 59</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-current-exp">当前经验值 *</label>
+                                <input type="number" autocomplete="off" id="advisor-current-exp" class="form-control" value="0" min="0">
+                                <div class="form-hint" id="advisor-exp-hint"><i class="fas fa-info-circle"></i> 1级升2级需要20经验</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-target-level">目标等级 *</label>
+                                <input type="number" autocomplete="off" id="advisor-target-level" class="form-control" value="60" min="2" max="60">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：2 - 60</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-skill-count">升级类型 *</label>
+                                <select id="advisor-skill-count" class="form-control">
+                                    <option value="1">单条属性（默认）</option>
+                                    <option value="2">单条技能</option>
+                                </select>
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 选择需要升级的类型</div>
+                            </div>
+                        </div>
+
+                        <!-- 限时包 -->
+                        <div class="card flex-item">
+                            <div class="card-title">限时包</div>
+                            <div class="tip-box">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-small-yangyan">材料包-阳炎符数量/包</label>
+                                <input type="number" autocomplete="off" id="advisor-small-yangyan" class="form-control" value="35" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-small-changsheng">材料包-长生符数量/包</label>          
+                                <input type="number" autocomplete="off" id="advisor-small-changsheng" class="form-control" value="15" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-small-shengren">材料包-圣人符数量/包</label>
+                                <input type="number" autocomplete="off" id="advisor-small-shengren" class="form-control" value="7" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-big-to-small">限时包-可兑换军师材料包数量/包</label>
+                                <input type="number" autocomplete="off" id="advisor-big-to-small" class="form-control" value="1000" min="1">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 例：1个限时包换1000个材料包，填1000</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-big-price">限时包单价/元</label>
+                                <input type="number" autocomplete="off" id="advisor-big-price" class="form-control" value="0" min="0" step="0.01">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 单个限时包的价格</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="advisor-rebate-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span style="margin-bottom: 0;">启用活动返利计算</span>
+                                </label>
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 活动期间消耗材料获积分，积分可兑换材料</div>
+                            </div>
+                        </div>
+                        <div class="card flex-item" id="advisor-rebate-settings" style="display: none;">
+                            <div class="card-title">活动上限设置</div>
+                            <div class="form-group">
+                                <label for="advisor-max-points">积分上限</label>
+                                <input type="number" autocomplete="off" id="advisor-max-points" class="form-control" value="7118280" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-yangyan-max">阳炎符兑换上限</label>
+                                <input type="number" autocomplete="off" id="advisor-yangyan-max" class="form-control" value="152100" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-changsheng-max">长生符兑换上限</label>
+                                <input type="number" autocomplete="off" id="advisor-changsheng-max" class="form-control" value="91260" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="advisor-shengren-max">圣人符兑换上限</label>
+                                <input type="number" autocomplete="off" id="advisor-shengren-max" class="form-control" value="45630" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算按钮 -->
+                    <div class="btn-group">
+                        <button class="btn btn-calc" id="advisor-calc-btn">计算</button>
+                        <button class="btn btn-reset" id="advisor-reset-btn">重置</button>
+                    </div>
+
+                    <!-- 所需基础材料 -->
+                    <div class="card">
+                        <div class="card-title">总计所需基础材料</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">阳炎符</div>
+                                <div class="result-value yangyan" id="advisor-total-yangyan">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">长生符</div>
+                                <div class="result-value changsheng" id="advisor-total-changsheng">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">圣人符</div>
+                                <div class="result-value shengren" id="advisor-total-shengren">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 材料包 -->
+                    <div class="card">
+                        <div class="card-title">所需材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">阳炎符包数</div>
+                                <div class="result-value small-package" id="advisor-yangyan-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">长生符包数</div>
+                                <div class="result-value small-package" id="advisor-changsheng-small">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">圣人符包数</div>
+                                <div class="result-value small-package" id="advisor-shengren-small">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 材料包 -->
+                    <div class="card">
+                        <div class="card-title">所需材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">总需限时包数</div>
+                                <div class="result-value big-package" id="advisor-total-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">总价格(元)</div>
+                                <div class="result-value" id="advisor-total-price" style="color: #f97316;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 活动返利结果 -->
+                    <div class="card" id="advisor-rebate-card" style="display: none;">
+                        <div class="card-title">活动返利计算结果</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">获得总积分</div>
+                                <div class="result-value" id="advisor-total-points">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利阳炎符</div>
+                                <div class="result-value yangyan" id="advisor-rebate-yangyan">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利长生符</div>
+                                <div class="result-value changsheng" id="advisor-rebate-changsheng">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利圣人符</div>
+                                <div class="result-value shengren" id="advisor-rebate-shengren">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后限时包数</div>
+                                <div class="result-value big-package" id="advisor-rebate-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省限时包数</div>
+                                <div class="result-value" id="advisor-saved-big" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后价格(元)</div>
+                                <div class="result-value" id="advisor-rebate-price" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省金额(元)</div>
+                                <div class="result-value" id="advisor-saved-price" style="color: #10b981;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 祭坛计算器 -->
+        <div id="altar-calculator" class="tab-content">
+            <div class="calculator-container">
+                <div class="calculator-content">
+                    <h1 class="main-title">祭坛材料计算器</h1>
+                    
+                    <!-- 等级和材料包并排布局 -->
+                    <div class="flex-container">
+                        <!-- 等级 -->
+                        <div class="card flex-item">
+                            <div class="card-title">等级</div>
+                            <div class="form-group">
+                                <label for="altar-current-level">当前等级 *</label>
+                                <input type="number" autocomplete="off" id="altar-current-level" class="form-control" value="1" min="1" max="89">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：1 - 89</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-current-exp">当前经验值 *</label>
+                                <input type="number" autocomplete="off" id="altar-current-exp" class="form-control" value="0" min="0">
+                                <div class="form-hint" id="altar-exp-hint"><i class="fas fa-info-circle"></i> 1级升2级需要30经验</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-target-level">目标等级 *</label>
+                                <input type="number" autocomplete="off" id="altar-target-level" class="form-control" value="90" min="2" max="90">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 范围：2 - 90</div>
+                            </div>
+                        </div>
+
+                        <!-- 材料包 -->
+                        <div class="card flex-item">
+                            <div class="card-title">材料包</div>
+                            <div class="tip-box">
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-small-material">材料包-祭坛材料数量/包</label>
+                                <input type="number" autocomplete="off" id="altar-small-material" class="form-control" value="100" min="1">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 祭坛材料自选包包含的祭坛材料数量</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-big-to-small">限时包-可兑换祭坛材料包数量/限时包</label>
+                                <input type="number" autocomplete="off" id="altar-big-to-small" class="form-control" value="100" min="1">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 例：1个限时包换100个材料包，填100</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-big-price">限时包单价/元</label>
+                                <input type="number" autocomplete="off" id="altar-big-price" class="form-control" value="0" min="0" step="0.01">
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 单个限时包的价格</div>
+                            </div>
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="altar-rebate-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span style="margin-bottom: 0;">启用活动返利计算</span>
+                                </label>
+                                <div class="form-hint"><i class="fas fa-info-circle"></i> 活动期间消耗材料获积分，积分可兑换材料</div>
+                            </div>
+                        </div>
+                        <div class="card flex-item" id="altar-rebate-settings" style="display: none;">
+                            <div class="card-title">活动上限设置</div>
+                            <div class="form-group">
+                                <label for="altar-max-points">积分上限</label>
+                                <input type="number" autocomplete="off" id="altar-max-points" class="form-control" value="6300000" min="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="altar-material-max">祭坛材料兑换上限</label>
+                                <input type="number" autocomplete="off" id="altar-material-max" class="form-control" value="45000" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 计算按钮 -->
+                    <div class="btn-group">
+                        <button class="btn btn-calc" id="altar-calc-btn">计算</button>
+                        <button class="btn btn-reset" id="altar-reset-btn">重置</button>
+                    </div>
+
+                    <!-- 基础材料 -->
+                    <div class="card">
+                        <div class="card-title">总计所需基础材料</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">总需祭坛材料</div>
+                                <div class="result-value material" id="altar-total-material">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">所需总经验</div>
+                                <div class="result-value exp" id="altar-total-exp">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">总操作次数</div>
+                                <div class="result-value times" id="altar-total-times">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 材料包 -->
+                    <div class="card">
+                        <div class="card-title">所需材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">祭坛材料包数</div>
+                                <div class="result-value small-package" id="altar-small-package">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 限时包需求 -->
+                    <div class="card">
+                        <div class="card-title">所需限时材料包数量</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">总需限时材料包数</div>
+                                <div class="result-value big-package" id="altar-big-package">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">总价格(元)</div>
+                                <div class="result-value" id="altar-total-price" style="color: #f97316;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 活动返利结果 -->
+                    <div class="card" id="altar-rebate-card" style="display: none;">
+                        <div class="card-title">活动返利计算结果</div>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <div class="result-label">获得总积分</div>
+                                <div class="result-value" id="altar-total-points">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利祭坛材料</div>
+                                <div class="result-value material" id="altar-rebate-material">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后限时包数</div>
+                                <div class="result-value big-package" id="altar-rebate-big">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省限时包数</div>
+                                <div class="result-value" id="altar-saved-big" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">返利后价格(元)</div>
+                                <div class="result-value" id="altar-rebate-price" style="color: #10b981;">0</div>
+                            </div>
+                            <div class="result-item">
+                                <div class="result-label">节省金额(元)</div>
+                                <div class="result-value" id="altar-saved-price" style="color: #10b981;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        
+        // ================================
+        // 高级选项卡切换功能
+        // ================================
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        // 为每个选项卡按钮添加点击事件
+        tabButtons.forEach(button => {
+            button.addEventListener('click', handleTabClick);
+            button.addEventListener('touchstart', handleTabClick, { passive: true });
+        });
+        
+        function handleTabClick(e) {
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            
+            const tabId = this.getAttribute('data-tab');
+            
+            // 更新按钮状态
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 更新内容显示
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            const activeContent = document.getElementById(`${tabId}-calculator`);
+            if (activeContent) {
+                activeContent.classList.add('active');
+            }
+        }
+        
+        // 初始化显示第一个选项卡
+        document.getElementById('beast-calculator').classList.add('active');
+
+        // ================================
+        // 神兽计算器逻辑
+        // ================================
+        const beastLevelData = [
+            { level: 1, upExp: 20, grass: 8, wood: 0, pill: 0 },
+            { level: 2, upExp: 60, grass: 36, wood: 0, pill: 0 },
+            { level: 3, upExp: 120, grass: 96, wood: 0, pill: 0 },
+            { level: 4, upExp: 200, grass: 200, wood: 0, pill: 0 },
+            { level: 5, upExp: 300, grass: 360, wood: 0, pill: 0 },
+            { level: 6, upExp: 420, grass: 546, wood: 234, pill: 0 },
+            { level: 7, upExp: 560, grass: 816, wood: 408, pill: 0 },
+            { level: 8, upExp: 720, grass: 1170, wood: 650, pill: 0 },
+            { level: 9, upExp: 900, grass: 1640, wood: 984, pill: 0 },
+            { level: 10, upExp: 1100, grass: 2200, wood: 1400, pill: 0 },
+            { level: 11, upExp: 1320, grass: 2640, wood: 1760, pill: 0 },
+            { level: 12, upExp: 1560, grass: 3380, wood: 2340, pill: 1040 },
+            { level: 13, upExp: 1820, grass: 4256, wood: 3040, pill: 1520 },
+            { level: 14, upExp: 2100, grass: 5250, wood: 3850, pill: 2100 },
+            { level: 15, upExp: 2400, grass: 6400, wood: 4800, pill: 2800 },
+            { level: 16, upExp: 2720, grass: 7106, wood: 5434, pill: 3344 },
+            { level: 17, upExp: 3060, grass: 8460, wood: 6580, pill: 4230 },
+            { level: 18, upExp: 3420, grass: 9994, wood: 7890, pill: 5260 },
+            { level: 19, upExp: 3800, grass: 11720, wood: 9376, pill: 6446 },
+            { level: 20, upExp: 4200, grass: 13566, wood: 10982, pill: 7752 },
+            { level: 21, upExp: 4620, grass: 14520, wood: 11880, pill: 8580 },
+            { level: 22, upExp: 5060, grass: 16606, wood: 13718, pill: 10108 },
+            { level: 23, upExp: 5520, grass: 18912, wood: 15760, pill: 11820 },
+            { level: 24, upExp: 6000, grass: 21450, wood: 18018, pill: 13728 },
+            { level: 25, upExp: 6500, grass: 24128, wood: 20416, pill: 15776 },
+            { level: 26, upExp: 7020, grass: 25272, wood: 21528, pill: 16848 },
+            { level: 27, upExp: 7560, grass: 28224, wood: 24192, pill: 19152 },
+            { level: 28, upExp: 8120, grass: 31436, wood: 27100, pill: 21680 },
+            { level: 29, upExp: 8700, grass: 34800, wood: 30160, pill: 24360 },
+            { level: 30, upExp: 9300, grass: 38440, wood: 33480, pill: 27280 },
+            { level: 31, upExp: 9920, grass: 39680, wood: 34720, pill: 28520 },
+            { level: 32, upExp: 10560, grass: 43560, wood: 38280, pill: 31680 },
+            { level: 33, upExp: 11220, grass: 47668, wood: 42060, pill: 35050 },
+            { level: 34, upExp: 11900, grass: 52080, wood: 46128, pill: 38688 },
+            { level: 35, upExp: 12600, grass: 56664, wood: 50368, pill: 42498 },
+            { level: 36, upExp: 13320, grass: 58016, wood: 51744, pill: 43904 },
+            { level: 37, upExp: 14060, grass: 62852, wood: 56236, pill: 47966 },
+            { level: 38, upExp: 14820, grass: 68016, wood: 61040, pill: 52320 },
+            { level: 39, upExp: 15000, grass: 70560, wood: 63504, pill: 54684 },
+            { level: 40, upExp: 17000, grass: 79296, wood: 71744, pill: 62304 },
+            { level: 41, upExp: 19000, grass: 92928, wood: 84480, pill: 73920 },
+            { level: 42, upExp: 21000, grass: 107364, wood: 98028, pill: 86358 },
+            { level: 43, upExp: 23000, grass: 122592, wood: 112376, pill: 99606 },
+            { level: 44, upExp: 25000, grass: 131600, wood: 121072, pill: 107912 },
+            { level: 45, upExp: 27000, grass: 147784, wood: 136416, pill: 122206 },
+            { level: 46, upExp: 29000, grass: 164916, wood: 152700, pill: 137430 },
+            { level: 47, upExp: 31000, grass: 182672, wood: 169624, pill: 153314 },
+            { level: 48, upExp: 33000, grass: 191400, wood: 178200, pill: 161700 },
+            { level: 49, upExp: 35000, grass: 210000, wood: 196000, pill: 178500 },
+            { level: 50, upExp: 37000, grass: 229400, wood: 214600, pill: 196100 },
+            { level: 51, upExp: 39000, grass: 249600, wood: 234000, pill: 214500 },
+            { level: 52, upExp: 41000, grass: 257796, wood: 242172, pill: 222642 },
+            { level: 53, upExp: 43000, grass: 278392, wood: 262016, pill: 241546 },
+            { level: 54, upExp: 45000, grass: 300020, wood: 282876, pill: 261446 },
+            { level: 55, upExp: 47000, grass: 322272, wood: 304368, pill: 281988 },
+            { level: 56, upExp: 49000, grass: 329596, wood: 311780, pill: 289510 },
+            { level: 57, upExp: 51000, grass: 352488, wood: 333936, pill: 310746 },
+            { level: 58, upExp: 53000, grass: 375804, wood: 356532, pill: 332442 },
+            { level: 59, upExp: 55000, grass: 400000, wood: 380000, pill: 355000 },
+            { level: 60, upExp: 57000, grass: 424924, wood: 404196, pill: 378286 },
+            { level: 61, upExp: 59000, grass: 430920, wood: 410400, pill: 384750 },
+            { level: 62, upExp: 61000, grass: 456144, wood: 434928, pill: 408408 },
+            { level: 63, upExp: 63000, grass: 462000, wood: 441000, pill: 414750 },
+            { level: 64, upExp: 65000, grass: 487440, wood: 465776, pill: 438696 },
+            { level: 65, upExp: 67000, grass: 493120, wood: 471680, pill: 444880 },
+            { level: 66, upExp: 69000, grass: 518880, wood: 496800, pill: 469200 },
+            { level: 67, upExp: 71000, grass: 524352, wood: 502504, pill: 475194 },
+            { level: 68, upExp: 73000, grass: 550368, wood: 527904, pill: 499824 },
+            { level: 69, upExp: 75000, grass: 555600, wood: 533376, pill: 505596 },
+            { level: 70, upExp: 77000, grass: 581808, wood: 558992, pill: 530472 },
+            { level: 71, upExp: 79000, grass: 586768, wood: 564200, pill: 535990 },
+            { level: 72, upExp: 81000, grass: 613316, wood: 590172, pill: 561242 },
+            { level: 73, upExp: 83000, grass: 618192, wood: 595296, pill: 566676 },
+            { level: 74, upExp: 85000, grass: 644820, wood: 621372, pill: 592062 },
+            { level: 75, upExp: 87000, grass: 649600, wood: 626400, pill: 597400 },
+            { level: 76, upExp: 89000, grass: 676476, wood: 652740, pill: 623070 },
+            { level: 77, upExp: 91000, grass: 680920, wood: 657440, pill: 628090 },
+            { level: 78, upExp: 93000, grass: 708000, wood: 684000, pill: 654000 },
+            { level: 79, upExp: 95000, grass: 712560, wood: 688808, pill: 659118 }
+        ];
+
+        // 神兽DOM元素
+        const beastCurrentLevelEl = document.getElementById('beast-current-level');
+        const beastCurrentExpEl = document.getElementById('beast-current-exp');
+        const beastTargetLevelEl = document.getElementById('beast-target-level');
+        const beastExpHintEl = document.getElementById('beast-exp-hint');
+        const beastSmallGrassEl = document.getElementById('beast-small-grass');
+        const beastSmallWoodEl = document.getElementById('beast-small-wood');
+        const beastSmallPillEl = document.getElementById('beast-small-pill');
+        const beastBigToSmallEl = document.getElementById('beast-big-to-small');
+        const beastCalcBtn = document.getElementById('beast-calc-btn');
+        const beastResetBtn = document.getElementById('beast-reset-btn');
+        
+        // 神兽结果元素
+        const beastTotalGrassEl = document.getElementById('beast-total-grass');
+        const beastTotalWoodEl = document.getElementById('beast-total-wood');
+        const beastTotalPillEl = document.getElementById('beast-total-pill');
+        const beastGrassSmallEl = document.getElementById('beast-grass-small');
+        const beastWoodSmallEl = document.getElementById('beast-wood-small');
+        const beastPillSmallEl = document.getElementById('beast-pill-small');
+        const beastTotalBigEl = document.getElementById('beast-total-big');
+
+        // 神兽实时更新经验提示
+        beastCurrentLevelEl.addEventListener('input', updateBeastExpHint);
+        beastCurrentLevelEl.addEventListener('change', updateBeastExpHint);
+        
+        function updateBeastExpHint() {
+            const currentLevel = parseInt(beastCurrentLevelEl.value) || 1;
+            const levelInfo = beastLevelData.find(item => item.level === currentLevel);
+            const upExp = levelInfo ? levelInfo.upExp : 20;
+            beastExpHintEl.textContent = `${currentLevel}级升${currentLevel+1}级需${upExp}经验`;
+        }
+
+        // 神兽返利设置元素
+        const beastRebateToggleEl = document.getElementById('beast-rebate-toggle');
+        const beastRebateSettingsEl = document.getElementById('beast-rebate-settings');
+        const beastMaxPointsEl = document.getElementById('beast-max-points');
+        const beastGrassMaxEl = document.getElementById('beast-grass-max');
+        const beastWoodMaxEl = document.getElementById('beast-wood-max');
+        const beastPillMaxEl = document.getElementById('beast-pill-max');
+        
+        // 神兽返利结果元素
+        const beastRebateCardEl = document.getElementById('beast-rebate-card');
+        const beastTotalPointsEl = document.getElementById('beast-total-points');
+        const beastRebateGrassEl = document.getElementById('beast-rebate-grass');
+        const beastRebateWoodEl = document.getElementById('beast-rebate-wood');
+        const beastRebatePillEl = document.getElementById('beast-rebate-pill');
+        const beastRebateBigEl = document.getElementById('beast-rebate-big');
+        const beastSavedBigEl = document.getElementById('beast-saved-big');
+        
+        // 神兽价格相关元素
+        const beastBigPriceEl = document.getElementById('beast-big-price');
+        const beastTotalPriceEl = document.getElementById('beast-total-price');
+        const beastRebatePriceEl = document.getElementById('beast-rebate-price');
+        const beastSavedPriceEl = document.getElementById('beast-saved-price');
+        
+        // 神兽活动返利基础配置
+        const beastRebateBaseConfig = {
+            grassPointsPer: 4,
+            woodPointsPer: 11,
+            pillPointsPer: 18,
+            grassCost: 12,
+            woodCost: 33,
+            pillCost: 54
+        };
+        
+        // 神兽返利开关事件
+        beastRebateToggleEl.addEventListener('change', function() {
+            if (this.checked) {
+                beastRebateSettingsEl.style.display = 'block';
+            } else {
+                beastRebateSettingsEl.style.display = 'none';
+            }
+        });
+
+        // 神兽核心计算逻辑
+        function calculateBeastMaterials() {
+            const currentLevel = parseInt(beastCurrentLevelEl.value) || 1;
+            const currentExp = parseInt(beastCurrentExpEl.value) || 0;
+            const targetLevel = parseInt(beastTargetLevelEl.value) || 80;
+            const smallGrass = parseInt(beastSmallGrassEl.value) || 91;
+            const smallWood = parseInt(beastSmallWoodEl.value) || 39;
+            const smallPill = parseInt(beastSmallPillEl.value) || 21;
+            const bigToSmall = parseInt(beastBigToSmallEl.value) || 80;
+            const bigPrice = parseFloat(beastBigPriceEl.value) || 0;
+            const enableRebate = beastRebateToggleEl.checked;
+            
+            const customMaxPoints = parseInt(beastMaxPointsEl.value) || 6750000;
+            const customGrassMax = parseInt(beastGrassMaxEl.value) || 120000;
+            const customWoodMax = parseInt(beastWoodMaxEl.value) || 75000;
+            const customPillMax = parseInt(beastPillMaxEl.value) || 52500;
+
+            // 输入校验
+            if (currentLevel >= targetLevel) {
+                alert('目标等级必须大于当前等级！');
+                return;
+            }
+            if (targetLevel > 80) {
+                alert('目标等级最高为80级！');
+                return;
+            }
+            const currentLevelInfo = beastLevelData.find(item => item.level === currentLevel);
+            if (!currentLevelInfo) {
+                alert('未找到当前等级的配置数据！');
+                return;
+            }
+            if (currentExp > currentLevelInfo.upExp) {
+                alert(`${currentLevel}级当前经验不能超过${currentLevelInfo.upExp}！`);
+                return;
+            }
+
+            // 计算材料总数
+            let totalGrass = 0;
+            let totalWood = 0;
+            let totalPill = 0;
+
+            // 计算当前等级剩余部分
+            if (currentLevel < targetLevel) {
+                const remainingExpRatio = (currentLevelInfo.upExp - currentExp) / currentLevelInfo.upExp;
+                totalGrass += Math.round(currentLevelInfo.grass * remainingExpRatio);
+                totalWood += Math.round(currentLevelInfo.wood * remainingExpRatio);
+                totalPill += Math.round(currentLevelInfo.pill * remainingExpRatio);
+            }
+
+            // 累加后续完整等级
+            for (let level = currentLevel + 1; level < targetLevel; level++) {
+                const levelInfo = beastLevelData.find(item => item.level === level);
+                if (levelInfo) {
+                    totalGrass += levelInfo.grass;
+                    totalWood += levelInfo.wood;
+                    totalPill += levelInfo.pill;
+                }
+            }
+
+            // 计算材料包数量
+            const grassSmall = Math.ceil(totalGrass / smallGrass);
+            const woodSmall = Math.ceil(totalWood / smallWood);
+            const pillSmall = Math.ceil(totalPill / smallPill);
+            const totalSmall = grassSmall + woodSmall + pillSmall;
+            const totalBig = Math.ceil(totalSmall / bigToSmall);
+
+            // 计算总价格
+            const totalPrice = totalBig * bigPrice;
+            
+            // 更新结果显示
+            beastTotalGrassEl.textContent = totalGrass.toLocaleString();
+            beastTotalWoodEl.textContent = totalWood.toLocaleString();
+            beastTotalPillEl.textContent = totalPill.toLocaleString();
+            beastGrassSmallEl.textContent = grassSmall.toLocaleString();
+            beastWoodSmallEl.textContent = woodSmall.toLocaleString();
+            beastPillSmallEl.textContent = pillSmall.toLocaleString();
+            beastTotalBigEl.textContent = totalBig.toLocaleString();
+            beastTotalPriceEl.textContent = totalPrice.toFixed(2);
+
+            // 处理返利计算
+            if (enableRebate) {
+                beastRebateCardEl.style.display = 'block';
+                calculateBeastRebate(totalGrass, totalWood, totalPill, smallGrass, smallWood, smallPill, bigToSmall, totalBig, bigPrice, customMaxPoints, customGrassMax, customWoodMax, customPillMax);
+            } else {
+                beastRebateCardEl.style.display = 'none';
+            }
+        }
+
+        beastCalcBtn.addEventListener('click', calculateBeastMaterials);
+        beastCalcBtn.addEventListener('touchstart', calculateBeastMaterials, { passive: true });
+
+        // 神兽返利计算逻辑 - 优化版本（基于实际包价值）
+        function calculateBeastRebate(needGrass, needWood, needPill, smallGrass, smallWood, smallPill, bigToSmall, originalBig, bigPrice, maxPoints, grassMax, woodMax, pillMax) {
+            let rebateGrass = 0;
+            let rebateWood = 0;
+            let rebatePill = 0;
+            let totalPoints = 0;
+
+            let pointsFromGrass = needGrass * beastRebateBaseConfig.grassPointsPer;
+            let pointsFromWood = needWood * beastRebateBaseConfig.woodPointsPer;
+            let pointsFromPill = needPill * beastRebateBaseConfig.pillPointsPer;
+            totalPoints = Math.min(pointsFromGrass + pointsFromWood + pointsFromPill, maxPoints);
+
+            let tempPoints = totalPoints;
+            
+            // 计算每种材料的包价值（根据用户提供的数据）
+            // 10000积分能换：
+            // 833草 = 9.15包 → 每包草价值：10000/9.15 ≈ 1092.9积分
+            // 303木 = 7.70包 → 每包木价值：10000/7.70 ≈ 1298.7积分
+            // 185丹 = 8.81包 → 每包丹价值：10000/8.81 ≈ 1135.1积分
+            
+            // 计算每种材料的包价值效率（每积分能获得的包价值）
+            const grassPackageValue = 9.15 / 10000;  // 每积分获得的包数
+            const woodPackageValue = 7.70 / 10000;  // 每积分获得的包数
+            const pillPackageValue = 8.81 / 10000;  // 每积分获得的包数
+
+            // 按包价值效率和需求排序材料
+            const materials = [
+                { 
+                    type: 'grass', 
+                    packageValue: grassPackageValue, 
+                    need: needGrass, 
+                    max: grassMax, 
+                    cost: beastRebateBaseConfig.grassCost, 
+                    rebate: () => rebateGrass, 
+                    setRebate: (val) => rebateGrass = val 
+                },
+                { 
+                    type: 'pill', 
+                    packageValue: pillPackageValue, 
+                    need: needPill, 
+                    max: pillMax, 
+                    cost: beastRebateBaseConfig.pillCost, 
+                    rebate: () => rebatePill, 
+                    setRebate: (val) => rebatePill = val 
+                },
+                { 
+                    type: 'wood', 
+                    packageValue: woodPackageValue, 
+                    need: needWood, 
+                    max: woodMax, 
+                    cost: beastRebateBaseConfig.woodCost, 
+                    rebate: () => rebateWood, 
+                    setRebate: (val) => rebateWood = val 
+                }
+            ];
+
+            // 排序：包价值效率高的优先，效率相同则需求大的优先
+            materials.sort((a, b) => {
+                if (b.packageValue !== a.packageValue) {
+                    return b.packageValue - a.packageValue;
+                }
+                return b.need - a.need;
+            });
+
+            // 批量兑换材料
+            for (const material of materials) {
+                if (tempPoints <= 0) break;
+                
+                const maxRedeem = Math.min(
+                    Math.floor(tempPoints / material.cost),
+                    material.max - material.rebate(),
+                    material.need
+                );
+                
+                if (maxRedeem > 0) {
+                    material.setRebate(material.rebate() + maxRedeem);
+                    tempPoints -= maxRedeem * material.cost;
+                }
+            }
+
+            let netGrass = Math.max(0, needGrass - rebateGrass);
+            let netWood = Math.max(0, needWood - rebateWood);
+            let netPill = Math.max(0, needPill - rebatePill);
+
+            let netGrassSmall = Math.ceil(netGrass / smallGrass);
+            let netWoodSmall = Math.ceil(netWood / smallWood);
+            let netPillSmall = Math.ceil(netPill / smallPill);
+            let netTotalSmall = netGrassSmall + netWoodSmall + netPillSmall;
+            let finalBig = Math.ceil(netTotalSmall / bigToSmall);
+            let savedBig = originalBig - finalBig;
+
+            // 计算价格
+            const rebatePrice = finalBig * bigPrice;
+            const savedPrice = originalBig * bigPrice - rebatePrice;
+            
+            beastTotalPointsEl.textContent = totalPoints.toLocaleString();
+            beastRebateGrassEl.textContent = rebateGrass.toLocaleString();
+            beastRebateWoodEl.textContent = rebateWood.toLocaleString();
+            beastRebatePillEl.textContent = rebatePill.toLocaleString();
+            beastRebateBigEl.textContent = finalBig.toLocaleString();
+            beastSavedBigEl.textContent = savedBig.toLocaleString();
+            beastRebatePriceEl.textContent = rebatePrice.toFixed(2);
+            beastSavedPriceEl.textContent = savedPrice.toFixed(2);
+        }
+
+        // 神兽重置功能
+        function resetBeastCalculator() {
+            beastCurrentLevelEl.value = 1;
+            beastCurrentExpEl.value = 0;
+            beastTargetLevelEl.value = 60;
+            beastSmallGrassEl.value = 91;
+            beastSmallWoodEl.value = 39;
+            beastSmallPillEl.value = 21;
+            beastBigToSmallEl.value = 80;
+            beastBigPriceEl.value = 0;
+            beastRebateToggleEl.checked = false;
+            beastMaxPointsEl.value = 6750000;
+            beastGrassMaxEl.value = 120000;
+            beastWoodMaxEl.value = 75000;
+            beastPillMaxEl.value = 52500;
+            updateBeastExpHint();
+            
+            [beastTotalGrassEl, beastTotalWoodEl, beastTotalPillEl, beastGrassSmallEl, beastWoodSmallEl, beastPillSmallEl, beastTotalBigEl, beastTotalPriceEl, beastRebatePriceEl, beastSavedPriceEl].forEach(el => {
+                el.textContent = '0';
+            });
+            
+            // 隐藏返利设置和结果
+            beastRebateSettingsEl.style.display = 'none';
+            beastRebateCardEl.style.display = 'none';
+        }
+
+        beastResetBtn.addEventListener('click', resetBeastCalculator);
+        beastResetBtn.addEventListener('touchstart', resetBeastCalculator, { passive: true });
+
+        // 神兽初始化经验提示
+        updateBeastExpHint();
+
+        // ================================
+        // 神装计算器逻辑
+        // ================================
+        const armorData = [
+            // 1-20级（云母、乌金、金刚、黑曜）
+            { level: 1, expNeed: 15, yunmu: 6, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 2, expNeed: 40, yunmu: 15, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 3, expNeed: 90, yunmu: 63, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 4, expNeed: 160, yunmu: 126, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 5, expNeed: 250, yunmu: 253, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 6, expNeed: 360, yunmu: 390, wujin: 150, jingang: 0, heiyao: 0 },
+            { level: 7, expNeed: 490, yunmu: 615, wujin: 287, jingang: 0, heiyao: 0 },
+            { level: 8, expNeed: 640, yunmu: 901, wujin: 477, jingang: 0, heiyao: 0 },
+            { level: 9, expNeed: 810, yunmu: 1292, wujin: 748, jingang: 0, heiyao: 0 },
+            { level: 10, expNeed: 1000, yunmu: 1743, wujin: 1079, jingang: 0, heiyao: 0 },
+            { level: 11, expNeed: 1210, yunmu: 2139, wujin: 1395, jingang: 0, heiyao: 0 },
+            { level: 12, expNeed: 1440, yunmu: 2775, wujin: 1887, jingang: 777, heiyao: 0 },
+            { level: 13, expNeed: 1690, yunmu: 3510, wujin: 2470, jingang: 1170, heiyao: 0 },
+            { level: 14, expNeed: 1960, yunmu: 4379, wujin: 3171, jingang: 1661, heiyao: 0 },
+            { level: 15, expNeed: 2250, yunmu: 5363, wujin: 3979, jingang: 2249, heiyao: 0 },
+            { level: 16, expNeed: 2560, yunmu: 6039, wujin: 4575, jingang: 2745, heiyao: 0 },
+            { level: 17, expNeed: 2890, yunmu: 7210, wujin: 5562, jingang: 3502, heiyao: 0 },
+            { level: 18, expNeed: 3240, yunmu: 8547, wujin: 6699, jingang: 4389, heiyao: 0 },
+            { level: 19, expNeed: 3610, yunmu: 10062, wujin: 7998, jingang: 5418, heiyao: 0 },
+            { level: 20, expNeed: 4000, yunmu: 0, wujin: 8811, jingang: 6141, heiyao: 1869 },
+            // 21-44级（乌金、金刚、黑曜）
+            { level: 21, expNeed: 4410, yunmu: 0, wujin: 9660, jingang: 6900, heiyao: 2484 },
+            { level: 22, expNeed: 4840, yunmu: 0, wujin: 10508, jingang: 7668, heiyao: 3124 },
+            { level: 23, expNeed: 5290, yunmu: 0, wujin: 10878, jingang: 8526, heiyao: 3822 },
+            { level: 24, expNeed: 5760, yunmu: 0, wujin: 11817, jingang: 9393, heiyao: 4545 },
+            { level: 25, expNeed: 6250, yunmu: 0, wujin: 13489, jingang: 7238, heiyao: 5593 },
+            { level: 26, expNeed: 6760, yunmu: 0, wujin: 15308, jingang: 8544, heiyao: 6764 },
+            { level: 27, expNeed: 7290, yunmu: 0, wujin: 16425, jingang: 9490, heiyao: 7665 },
+            { level: 28, expNeed: 7840, yunmu: 0, wujin: 18424, jingang: 10976, heiyao: 9016 },
+            { level: 29, expNeed: 8410, yunmu: 0, wujin: 20580, jingang: 12600, heiyao: 10500 },
+            { level: 30, expNeed: 9000, yunmu: 0, wujin: 21879, jingang: 13728, heiyao: 11583 },
+            { level: 31, expNeed: 9610, yunmu: 0, wujin: 24221, jingang: 15538, heiyao: 13253 },
+            { level: 32, expNeed: 10240, yunmu: 0, wujin: 26840, jingang: 17568, heiyao: 15128 },
+            { level: 33, expNeed: 10890, yunmu: 0, wujin: 28215, jingang: 18810, heiyao: 16335 },
+            { level: 34, expNeed: 11560, yunmu: 0, wujin: 31034, jingang: 21040, heiyao: 18410 },
+            { level: 35, expNeed: 12250, yunmu: 0, wujin: 33916, jingang: 23352, heiyao: 20572 },
+            { level: 36, expNeed: 12960, yunmu: 0, wujin: 35532, jingang: 24816, heiyao: 21996 },
+            { level: 37, expNeed: 13690, yunmu: 0, wujin: 38675, jingang: 27370, heiyao: 24395 },
+            { level: 38, expNeed: 14440, yunmu: 0, wujin: 42076, jingang: 30144, heiyao: 27004 },
+            { level: 39, expNeed: 15210, yunmu: 0, wujin: 43746, jingang: 31700, heiyao: 28530 },
+            { level: 40, expNeed: 16000, yunmu: 0, wujin: 47286, jingang: 34632, heiyao: 31302 },
+            { level: 41, expNeed: 16810, yunmu: 0, wujin: 51173, jingang: 37854, heiyao: 34349 },
+            { level: 42, expNeed: 17640, yunmu: 0, wujin: 52875, jingang: 39480, heiyao: 35955 },
+            { level: 43, expNeed: 18490, yunmu: 0, wujin: 56980, jingang: 42920, heiyao: 39220 },
+            { level: 44, expNeed: 19360, yunmu: 0, wujin: 61146, jingang: 46440, heiyao: 42570 },
+            { level: 45, expNeed: 46820, yunmu: 0, wujin: 145881, jingang: 111662, heiyao: 102657 },
+            { level: 46, expNeed: 18490, yunmu: 0, wujin: 59013, jingang: 45504, heiyao: 41949 },
+            { level: 47, expNeed: 18490, yunmu: 0, wujin: 60435, jingang: 46926, heiyao: 43371 },
+            { level: 48, expNeed: 18490, yunmu: 0, wujin: 59595, jingang: 46580, heiyao: 43155 },
+            { level: 49, expNeed: 18490, yunmu: 0, wujin: 60965, jingang: 47950, heiyao: 44525 },
+            { level: 50, expNeed: 18490, yunmu: 0, wujin: 62335, jingang: 49320, heiyao: 45895 },
+            { level: 51, expNeed: 18490, yunmu: 0, wujin: 61380, jingang: 48840, heiyao: 45540 },
+            { level: 52, expNeed: 18490, yunmu: 0, wujin: 62795, jingang: 50236, heiyao: 46931 },
+            { level: 53, expNeed: 18490, yunmu: 0, wujin: 64020, jingang: 51480, heiyao: 48180 },
+            { level: 54, expNeed: 18490, yunmu: 0, wujin: 63162, jingang: 51040, heiyao: 47850 },
+            { level: 55, expNeed: 18490, yunmu: 0, wujin: 64337, jingang: 52234, heiyao: 49049 },
+            { level: 56, expNeed: 18490, yunmu: 0, wujin: 65714, jingang: 53592, heiyao: 50402 },
+            { level: 57, expNeed: 18490, yunmu: 0, wujin: 64680, jingang: 52976, heiyao: 49896 },
+            { level: 58, expNeed: 18490, yunmu: 0, wujin: 65912, jingang: 54208, heiyao: 51128 },
+            { level: 59, expNeed: 18490, yunmu: 0, wujin: 67253, jingang: 55530, heiyao: 52445 }
+        ];
+
+        // 神装DOM元素
+        const armorCurrentLevelEl = document.getElementById('armor-current-level');
+        const armorCurrentExpEl = document.getElementById('armor-current-exp');
+        const armorTargetLevelEl = document.getElementById('armor-target-level');
+        const armorExpHintEl = document.getElementById('armor-exp-hint');
+        const armorSmallYunmuEl = document.getElementById('armor-small-yunmu');
+        const armorSmallWujinEl = document.getElementById('armor-small-wujin');
+        const armorSmallJingangEl = document.getElementById('armor-small-jingang');
+        const armorSmallHeiyaoEl = document.getElementById('armor-small-heiyao');
+        const armorBigToSmallEl = document.getElementById('armor-big-to-small');
+        const armorCalcBtn = document.getElementById('armor-calc-btn');
+        const armorResetBtn = document.getElementById('armor-reset-btn');
+        
+        // 神装结果元素
+        const armorTotalYunmuEl = document.getElementById('armor-total-yunmu');
+        const armorTotalWujinEl = document.getElementById('armor-total-wujin');
+        const armorTotalJingangEl = document.getElementById('armor-total-jingang');
+        const armorTotalHeiyaoEl = document.getElementById('armor-total-heiyao');
+        const armorYunmuSmallEl = document.getElementById('armor-yunmu-small');
+        const armorWujinSmallEl = document.getElementById('armor-wujin-small');
+        const armorJingangSmallEl = document.getElementById('armor-jingang-small');
+        const armorHeiyaoSmallEl = document.getElementById('armor-heiyao-small');
+        const armorTotalBigEl = document.getElementById('armor-total-big');
+        
+        // 神装返利设置元素
+        const armorRebateToggleEl = document.getElementById('armor-rebate-toggle');
+        const armorRebateSettingsEl = document.getElementById('armor-rebate-settings');
+        const armorMaxPointsEl = document.getElementById('armor-max-points');
+        const armorYunmuMaxEl = document.getElementById('armor-yunmu-max');
+        const armorWujinMaxEl = document.getElementById('armor-wujin-max');
+        const armorJingangMaxEl = document.getElementById('armor-jingang-max');
+        const armorHeiyaoMaxEl = document.getElementById('armor-heiyao-max');
+        
+        // 神装返利结果元素
+        const armorRebateCardEl = document.getElementById('armor-rebate-card');
+        const armorTotalPointsEl = document.getElementById('armor-total-points');
+        const armorRebateYunmuEl = document.getElementById('armor-rebate-yunmu');
+        const armorRebateWujinEl = document.getElementById('armor-rebate-wujin');
+        const armorRebateJingangEl = document.getElementById('armor-rebate-jingang');
+        const armorRebateHeiyaoEl = document.getElementById('armor-rebate-heiyao');
+        const armorRebateBigEl = document.getElementById('armor-rebate-big');
+        const armorSavedBigEl = document.getElementById('armor-saved-big');
+        
+        // 神装价格相关元素
+        const armorBigPriceEl = document.getElementById('armor-big-price');
+        const armorTotalPriceEl = document.getElementById('armor-total-price');
+        const armorRebatePriceEl = document.getElementById('armor-rebate-price');
+        const armorSavedPriceEl = document.getElementById('armor-saved-price');
+        
+        // 神装活动返利基础配置
+        const armorRebateBaseConfig = {
+            yunmuPointsPer: 3,
+            wujinPointsPer: 6,
+            jingangPointsPer: 15,
+            heiyaoPointsPer: 25,
+            yunmuCost: 12,
+            wujinCost: 24,
+            jingangCost: 60,
+            heiyaoCost: 100
+        };
+
+        // 神装实时更新经验提示
+        armorCurrentLevelEl.addEventListener('input', updateArmorExpHint);
+        armorCurrentLevelEl.addEventListener('change', updateArmorExpHint);
+        
+        // 神装返利开关事件
+        armorRebateToggleEl.addEventListener('change', function() {
+            if (this.checked) {
+                armorRebateSettingsEl.style.display = 'block';
+            } else {
+                armorRebateSettingsEl.style.display = 'none';
+            }
+        });
+        
+        function updateArmorExpHint() {
+            const currentLevel = parseInt(armorCurrentLevelEl.value) || 1;
+            const levelInfo = armorData.find(item => item.level === currentLevel);
+            if (levelInfo) {
+                armorExpHintEl.textContent = `${currentLevel}级升${currentLevel+1}级需要${levelInfo.expNeed}经验`;
+            }
+        }
+
+        // 神装核心计算逻辑
+        function calculateArmorMaterials() {
+            const currentLevel = parseInt(armorCurrentLevelEl.value) || 1;
+            const currentExp = parseInt(armorCurrentExpEl.value) || 0;
+            const targetLevel = parseInt(armorTargetLevelEl.value) || 60;
+            const smallYunmu = parseFloat(armorSmallYunmuEl.value) || 10;
+            const smallWujin = parseFloat(armorSmallWujinEl.value) || 5;
+            const smallJingang = parseFloat(armorSmallJingangEl.value) || 2;
+            const smallHeiyao = parseFloat(armorSmallHeiyaoEl.value) || 1.25;
+            const bigToSmall = parseInt(armorBigToSmallEl.value) || 1000;
+            const bigPrice = parseFloat(armorBigPriceEl.value) || 0;
+            const enableRebate = armorRebateToggleEl.checked;
+            
+            const customMaxPoints = parseInt(armorMaxPointsEl.value) || 6450000;
+            const customYunmuMax = parseInt(armorYunmuMaxEl.value) || 105000;
+            const customWujinMax = parseInt(armorWujinMaxEl.value) || 67500;
+            const customJingangMax = parseInt(armorJingangMaxEl.value) || 34500;
+            const customHeiyaoMax = parseInt(armorHeiyaoMaxEl.value) || 15000;
+
+            // 输入校验
+            if (currentLevel >= targetLevel) {
+                alert('目标等级必须大于当前等级！');
+                return;
+            }
+            if (targetLevel > 60) {
+                alert('目标等级最高为60级！');
+                return;
+            }
+            const currentLevelInfo = armorData.find(item => item.level === currentLevel);
+            if (!currentLevelInfo) {
+                alert('未找到当前等级的配置数据！');
+                return;
+            }
+            const currentExpNeeded = currentLevelInfo.expNeed;
+            if (currentExp > currentExpNeeded) {
+                alert(`${currentLevel}级当前经验不能超过${currentExpNeeded}！`);
+                return;
+            }
+
+            // 计算材料总数
+            let totalYunmu = 0;
+            let totalWujin = 0;
+            let totalJingang = 0;
+            let totalHeiyao = 0;
+
+            // 1. 计算当前等级剩余部分
+            if (currentLevel < targetLevel) {
+                const currentExpProgress = currentExpNeeded > 0 ? Math.min(currentExp / currentExpNeeded, 1) : 0;
+                totalYunmu += Math.round(currentLevelInfo.yunmu * (1 - currentExpProgress));
+                totalWujin += Math.round(currentLevelInfo.wujin * (1 - currentExpProgress));
+                totalJingang += Math.round(currentLevelInfo.jingang * (1 - currentExpProgress));
+                totalHeiyao += Math.round(currentLevelInfo.heiyao * (1 - currentExpProgress));
+            }
+
+            // 2. 累加后续完整等级
+            for (let level = currentLevel + 1; level < targetLevel; level++) {
+                const levelInfo = armorData.find(item => item.level === level);
+                if (levelInfo) {
+                    totalYunmu += levelInfo.yunmu;
+                    totalWujin += levelInfo.wujin;
+                    totalJingang += levelInfo.jingang;
+                    totalHeiyao += levelInfo.heiyao;
+                }
+            }
+
+            // 3. 计算材料包需求
+            const yunmuSmall = Math.ceil(totalYunmu / smallYunmu);
+            const wujinSmall = Math.ceil(totalWujin / smallWujin);
+            const jingangSmall = Math.ceil(totalJingang / smallJingang);
+            const heiyaoSmall = Math.ceil(totalHeiyao / smallHeiyao);
+            const totalSmall = yunmuSmall + wujinSmall + jingangSmall + heiyaoSmall;
+            const totalBig = Math.ceil(totalSmall / bigToSmall);
+
+            // 计算总价格
+            const totalPrice = totalBig * bigPrice;
+            
+            // 4. 更新结果显示
+            armorTotalYunmuEl.textContent = totalYunmu.toLocaleString();
+            armorTotalWujinEl.textContent = totalWujin.toLocaleString();
+            armorTotalJingangEl.textContent = totalJingang.toLocaleString();
+            armorTotalHeiyaoEl.textContent = totalHeiyao.toLocaleString();
+            armorYunmuSmallEl.textContent = yunmuSmall.toLocaleString();
+            armorWujinSmallEl.textContent = wujinSmall.toLocaleString();
+            armorJingangSmallEl.textContent = jingangSmall.toLocaleString();
+            armorHeiyaoSmallEl.textContent = heiyaoSmall.toLocaleString();
+            armorTotalBigEl.textContent = totalBig.toLocaleString();
+            armorTotalPriceEl.textContent = totalPrice.toFixed(2);
+
+            // 处理返利计算
+            if (enableRebate) {
+                armorRebateCardEl.style.display = 'block';
+                calculateArmorRebate(totalYunmu, totalWujin, totalJingang, totalHeiyao, smallYunmu, smallWujin, smallJingang, smallHeiyao, bigToSmall, totalBig, bigPrice, customMaxPoints, customYunmuMax, customWujinMax, customJingangMax, customHeiyaoMax);
+            } else {
+                armorRebateCardEl.style.display = 'none';
+            }
+        }
+
+        // 神装返利计算逻辑 - 优化版本（基于材料包效率）
+        function calculateArmorRebate(needYunmu, needWujin, needJingang, needHeiyao, smallYunmu, smallWujin, smallJingang, smallHeiyao, bigToSmall, originalBig, bigPrice, maxPoints, yunmuMax, wujinMax, jingangMax, heiyaoMax) {
+            let rebateYunmu = 0;
+            let rebateWujin = 0;
+            let rebateJingang = 0;
+            let rebateHeiyao = 0;
+            let totalPoints = 0;
+
+            let pointsFromYunmu = needYunmu * armorRebateBaseConfig.yunmuPointsPer;
+            let pointsFromWujin = needWujin * armorRebateBaseConfig.wujinPointsPer;
+            let pointsFromJingang = needJingang * armorRebateBaseConfig.jingangPointsPer;
+            let pointsFromHeiyao = needHeiyao * armorRebateBaseConfig.heiyaoPointsPer;
+            totalPoints = Math.min(pointsFromYunmu + pointsFromWujin + pointsFromJingang + pointsFromHeiyao, maxPoints);
+
+            let tempPoints = totalPoints;
+            
+            // 计算每种材料的包效率（材料包中的数量）
+            const packageEfficiencyYunmu = smallYunmu;    // 云母石/包
+            const packageEfficiencyWujin = smallWujin;    // 乌金石/包
+            const packageEfficiencyJingang = smallJingang; // 金刚石/包
+            const packageEfficiencyHeiyao = smallHeiyao;   // 黑曜石/包
+
+            // 按包效率和需求排序材料
+            const materials = [
+                { 
+                    type: 'yunmu', 
+                    packageEfficiency: packageEfficiencyYunmu, 
+                    need: needYunmu, 
+                    max: yunmuMax, 
+                    cost: armorRebateBaseConfig.yunmuCost, 
+                    rebate: () => rebateYunmu, 
+                    setRebate: (val) => rebateYunmu = val 
+                },
+                { 
+                    type: 'wujin', 
+                    packageEfficiency: packageEfficiencyWujin, 
+                    need: needWujin, 
+                    max: wujinMax, 
+                    cost: armorRebateBaseConfig.wujinCost, 
+                    rebate: () => rebateWujin, 
+                    setRebate: (val) => rebateWujin = val 
+                },
+                { 
+                    type: 'jingang', 
+                    packageEfficiency: packageEfficiencyJingang, 
+                    need: needJingang, 
+                    max: jingangMax, 
+                    cost: armorRebateBaseConfig.jingangCost, 
+                    rebate: () => rebateJingang, 
+                    setRebate: (val) => rebateJingang = val 
+                },
+                { 
+                    type: 'heiyao', 
+                    packageEfficiency: packageEfficiencyHeiyao, 
+                    need: needHeiyao, 
+                    max: heiyaoMax, 
+                    cost: armorRebateBaseConfig.heiyaoCost, 
+                    rebate: () => rebateHeiyao, 
+                    setRebate: (val) => rebateHeiyao = val 
+                }
+            ];
+
+            // 排序：包效率高的优先，效率相同则需求大的优先
+            materials.sort((a, b) => {
+                if (b.packageEfficiency !== a.packageEfficiency) {
+                    return b.packageEfficiency - a.packageEfficiency;
+                }
+                return b.need - a.need;
+            });
+
+            // 批量兑换材料
+            for (const material of materials) {
+                if (tempPoints <= 0) break;
+                
+                const maxRedeem = Math.min(
+                    Math.floor(tempPoints / material.cost),
+                    material.max - material.rebate(),
+                    material.need
+                );
+                
+                if (maxRedeem > 0) {
+                    material.setRebate(material.rebate() + maxRedeem);
+                    tempPoints -= maxRedeem * material.cost;
+                }
+            }
+
+            let netYunmu = Math.max(0, needYunmu - rebateYunmu);
+            let netWujin = Math.max(0, needWujin - rebateWujin);
+            let netJingang = Math.max(0, needJingang - rebateJingang);
+            let netHeiyao = Math.max(0, needHeiyao - rebateHeiyao);
+
+            let netYunmuSmall = Math.ceil(netYunmu / smallYunmu);
+            let netWujinSmall = Math.ceil(netWujin / smallWujin);
+            let netJingangSmall = Math.ceil(netJingang / smallJingang);
+            let netHeiyaoSmall = Math.ceil(netHeiyao / smallHeiyao);
+            let netTotalSmall = netYunmuSmall + netWujinSmall + netJingangSmall + netHeiyaoSmall;
+            let finalBig = Math.ceil(netTotalSmall / bigToSmall);
+            let savedBig = originalBig - finalBig;
+
+            // 计算价格
+            const rebatePrice = finalBig * bigPrice;
+            const savedPrice = originalBig * bigPrice - rebatePrice;
+            
+            armorTotalPointsEl.textContent = totalPoints.toLocaleString();
+            armorRebateYunmuEl.textContent = rebateYunmu.toLocaleString();
+            armorRebateWujinEl.textContent = rebateWujin.toLocaleString();
+            armorRebateJingangEl.textContent = rebateJingang.toLocaleString();
+            armorRebateHeiyaoEl.textContent = rebateHeiyao.toLocaleString();
+            armorRebateBigEl.textContent = finalBig.toLocaleString();
+            armorSavedBigEl.textContent = savedBig.toLocaleString();
+            armorRebatePriceEl.textContent = rebatePrice.toFixed(2);
+            armorSavedPriceEl.textContent = savedPrice.toFixed(2);
+        }
+
+        armorCalcBtn.addEventListener('click', calculateArmorMaterials);
+        armorCalcBtn.addEventListener('touchstart', calculateArmorMaterials, { passive: true });
+
+        // 神装重置功能
+        function resetArmorCalculator() {
+            armorCurrentLevelEl.value = 1;
+            armorCurrentExpEl.value = 0;
+            armorTargetLevelEl.value = 60;
+            armorSmallYunmuEl.value = 10;
+            armorSmallWujinEl.value = 5;
+            armorSmallJingangEl.value = 2;
+            armorSmallHeiyaoEl.value = 1.25;
+            armorBigToSmallEl.value = 1000;
+            armorBigPriceEl.value = 0;
+            armorRebateToggleEl.checked = false;
+            armorMaxPointsEl.value = 6450000;
+            armorYunmuMaxEl.value = 105000;
+            armorWujinMaxEl.value = 67500;
+            armorJingangMaxEl.value = 34500;
+            armorHeiyaoMaxEl.value = 15000;
+            updateArmorExpHint();
+            
+            // 重置结果显示
+            armorTotalYunmuEl.textContent = '0';
+            armorTotalWujinEl.textContent = '0';
+            armorTotalJingangEl.textContent = '0';
+            armorTotalHeiyaoEl.textContent = '0';
+            armorYunmuSmallEl.textContent = '0';
+            armorWujinSmallEl.textContent = '0';
+            armorJingangSmallEl.textContent = '0';
+            armorHeiyaoSmallEl.textContent = '0';
+            armorTotalBigEl.textContent = '0';
+            armorTotalPriceEl.textContent = '0';
+            armorRebatePriceEl.textContent = '0';
+            armorSavedPriceEl.textContent = '0';
+            
+            // 隐藏返利设置和结果
+            armorRebateSettingsEl.style.display = 'none';
+            armorRebateCardEl.style.display = 'none';
+        }
+
+        armorResetBtn.addEventListener('click', resetArmorCalculator);
+        armorResetBtn.addEventListener('touchstart', resetArmorCalculator, { passive: true });
+
+        // 神装初始化经验提示
+        updateArmorExpHint();
+
+        // ================================
+        // 军师计算器逻辑
+        // ================================
+        const advisorData = [
+            { level: 1, upExp: 20, yangyan: 4, changsheng: 0, shengren: 0 },
+            { level: 2, upExp: 30, yangyan: 4, changsheng: 0, shengren: 0 },
+            { level: 3, upExp: 60, yangyan: 24, changsheng: 0, shengren: 0 },
+            { level: 4, upExp: 110, yangyan: 48, changsheng: 0, shengren: 0 },
+            { level: 5, upExp: 180, yangyan: 110, changsheng: 0, shengren: 0 },
+            { level: 6, upExp: 270, yangyan: 192, changsheng: 64, shengren: 0 },
+            { level: 7, upExp: 380, yangyan: 294, changsheng: 126, shengren: 0 },
+            { level: 8, upExp: 510, yangyan: 448, changsheng: 224, shengren: 0 },
+            { level: 9, upExp: 660, yangyan: 666, changsheng: 370, shengren: 0 },
+            { level: 10, upExp: 830, yangyan: 920, changsheng: 552, shengren: 0 },
+            { level: 11, upExp: 1020, yangyan: 1254, changsheng: 798, shengren: 0 },
+            { level: 12, upExp: 1230, yangyan: 1632, changsheng: 1088, shengren: 408 },
+            { level: 13, upExp: 1460, yangyan: 2106, changsheng: 1458, shengren: 648 },
+            { level: 14, upExp: 1710, yangyan: 2520, changsheng: 1800, shengren: 900 },
+            { level: 15, upExp: 1980, yangyan: 3120, changsheng: 2288, shengren: 1248 },
+            { level: 16, upExp: 2270, yangyan: 3840, changsheng: 2880, shengren: 1680 },
+            { level: 17, upExp: 2580, yangyan: 4624, changsheng: 3536, shengren: 2176 },
+            { level: 18, upExp: 2910, yangyan: 5508, changsheng: 4284, shengren: 2754 },
+            { level: 19, upExp: 3260, yangyan: 6194, changsheng: 4890, shengren: 3256 },
+            { level: 20, upExp: 3260, yangyan: 6520, changsheng: 5216, shengren: 3580 },
+            { level: 21, upExp: 3630, yangyan: 7602, changsheng: 6154, shengren: 4344 },
+            { level: 22, upExp: 4020, yangyan: 8844, changsheng: 7236, shengren: 5226 },
+            { level: 23, upExp: 4430, yangyan: 10212, changsheng: 8436, shengren: 6216 },
+            { level: 24, upExp: 4860, yangyan: 11664, changsheng: 9720, shengren: 7290 },
+            { level: 25, upExp: 5310, yangyan: 12650, changsheng: 10626, shengren: 8096 },
+            { level: 26, upExp: 5780, yangyan: 14300, changsheng: 12100, shengren: 9350 },
+            { level: 27, upExp: 6270, yangyan: 16146, changsheng: 13754, shengren: 10764 },
+            { level: 28, upExp: 6780, yangyan: 18032, changsheng: 15456, shengren: 12236 },
+            { level: 29, upExp: 7310, yangyan: 20242, changsheng: 17450, shengren: 13960 },
+            { level: 30, upExp: 7930, yangyan: 23760, changsheng: 19440, shengren: 15120 },
+            { level: 31, upExp: 8580, yangyan: 28860, changsheng: 22620, shengren: 17160 },
+            { level: 32, upExp: 9280, yangyan: 34604, changsheng: 26164, shengren: 19412 },
+            { level: 33, upExp: 10030, yangyan: 41040, changsheng: 30096, shengren: 21888 },
+            { level: 34, upExp: 10830, yangyan: 48216, changsheng: 34440, shengren: 24600 },
+            { level: 35, upExp: 11680, yangyan: 56286, changsheng: 39294, shengren: 27612 },
+            { level: 36, upExp: 12580, yangyan: 65208, changsheng: 44616, shengren: 30888 },
+            { level: 37, upExp: 13530, yangyan: 75030, changsheng: 50430, shengren: 34440 },
+            { level: 38, upExp: 14530, yangyan: 85800, changsheng: 56760, shengren: 38280 },
+            { level: 39, upExp: 15630, yangyan: 98118, changsheng: 63990, shengren: 42660 },
+            { level: 40, upExp: 16830, yangyan: 106726, changsheng: 68714, shengren: 45322 },
+            { level: 41, upExp: 18130, yangyan: 121506, changsheng: 77322, shengren: 50496 },
+            { level: 42, upExp: 19530, yangyan: 137538, changsheng: 86598, shengren: 56034 },
+            { level: 43, upExp: 21030, yangyan: 155380, changsheng: 96884, shengren: 62152 },
+            { level: 44, upExp: 22630, yangyan: 175152, changsheng: 108240, shengren: 68880 },
+            { level: 45, upExp: 24280, yangyan: 196416, changsheng: 120384, shengren: 76032 },
+            { level: 46, upExp: 25980, yangyan: 201760, changsheng: 122720, shengren: 76960 },
+            { level: 47, upExp: 25980, yangyan: 210080, changsheng: 126880, shengren: 78736 },
+            { level: 48, upExp: 27780, yangyan: 233520, changsheng: 140112, shengren: 86736 },
+            { level: 49, upExp: 27780, yangyan: 242416, changsheng: 144560, shengren: 88960 },
+            { level: 50, upExp: 29680, yangyan: 248600, changsheng: 147400, shengren: 90200 },
+            { level: 51, upExp: 29680, yangyan: 257400, changsheng: 151800, shengren: 92400 },
+            { level: 52, upExp: 31680, yangyan: 284108, changsheng: 166708, shengren: 100964 },
+            { level: 53, upExp: 31680, yangyan: 293500, changsheng: 171404, shengren: 103312 },
+            { level: 54, upExp: 33780, yangyan: 297216, changsheng: 172800, shengren: 103680 },
+            { level: 55, upExp: 33780, yangyan: 321062, changsheng: 185878, shengren: 111044 },
+            { level: 56, upExp: 35980, yangyan: 352090, changsheng: 203030, shengren: 120790 },
+            { level: 57, upExp: 35980, yangyan: 362370, changsheng: 208170, shengren: 123360 },
+            { level: 58, upExp: 38280, yangyan: 396720, changsheng: 227088, shengren: 134064 },
+            { level: 59, upExp: 40680, yangyan: 432994, changsheng: 247010, shengren: 145300 }
+        ];
+
+        // 军师DOM元素
+        const advisorCurrentLevelEl = document.getElementById('advisor-current-level');
+        const advisorCurrentExpEl = document.getElementById('advisor-current-exp');
+        const advisorTargetLevelEl = document.getElementById('advisor-target-level');
+        const advisorExpHintEl = document.getElementById('advisor-exp-hint');
+        const advisorSkillCountEl = document.getElementById('advisor-skill-count');
+        const advisorSmallYangyanEl = document.getElementById('advisor-small-yangyan');
+        const advisorSmallChangshengEl = document.getElementById('advisor-small-changsheng');
+        const advisorSmallShengrenEl = document.getElementById('advisor-small-shengren');
+        const advisorBigToSmallEl = document.getElementById('advisor-big-to-small');
+        const advisorCalcBtn = document.getElementById('advisor-calc-btn');
+        const advisorResetBtn = document.getElementById('advisor-reset-btn');
+        const advisorRebateToggleEl = document.getElementById('advisor-rebate-toggle');
+        
+        // 军师结果元素
+        const advisorTotalYangyanEl = document.getElementById('advisor-total-yangyan');
+        const advisorTotalChangshengEl = document.getElementById('advisor-total-changsheng');
+        const advisorTotalShengrenEl = document.getElementById('advisor-total-shengren');
+        const advisorYangyanSmallEl = document.getElementById('advisor-yangyan-small');
+        const advisorChangshengSmallEl = document.getElementById('advisor-changsheng-small');
+        const advisorShengrenSmallEl = document.getElementById('advisor-shengren-small');
+        const advisorTotalBigEl = document.getElementById('advisor-total-big');
+        
+        // 军师返利结果元素
+        const advisorRebateCardEl = document.getElementById('advisor-rebate-card');
+        const advisorTotalPointsEl = document.getElementById('advisor-total-points');
+        const advisorRebateYangyanEl = document.getElementById('advisor-rebate-yangyan');
+        const advisorRebateChangshengEl = document.getElementById('advisor-rebate-changsheng');
+        const advisorRebateShengrenEl = document.getElementById('advisor-rebate-shengren');
+        const advisorRebateBigEl = document.getElementById('advisor-rebate-big');
+        const advisorSavedBigEl = document.getElementById('advisor-saved-big');
+        
+        // 军师价格相关元素
+        const advisorBigPriceEl = document.getElementById('advisor-big-price');
+        const advisorTotalPriceEl = document.getElementById('advisor-total-price');
+        const advisorRebatePriceEl = document.getElementById('advisor-rebate-price');
+        const advisorSavedPriceEl = document.getElementById('advisor-saved-price');
+        
+        // 军师返利设置元素
+        const advisorRebateSettingsEl = document.getElementById('advisor-rebate-settings');
+        const advisorMaxPointsEl = document.getElementById('advisor-max-points');
+        const advisorYangyanMaxEl = document.getElementById('advisor-yangyan-max');
+        const advisorChangshengMaxEl = document.getElementById('advisor-changsheng-max');
+        const advisorShengrenMaxEl = document.getElementById('advisor-shengren-max');
+
+        // 军师实时更新经验提示
+        advisorCurrentLevelEl.addEventListener('input', updateAdvisorExpHint);
+        advisorCurrentLevelEl.addEventListener('change', updateAdvisorExpHint);
+        
+        // 军师返利开关事件
+        advisorRebateToggleEl.addEventListener('change', function() {
+            if (this.checked) {
+                advisorRebateSettingsEl.style.display = 'block';
+            } else {
+                advisorRebateSettingsEl.style.display = 'none';
+            }
+        });
+        
+        function updateAdvisorExpHint() {
+            const currentLevel = parseInt(advisorCurrentLevelEl.value) || 1;
+            const levelInfo = advisorData.find(item => item.level === currentLevel);
+            const upExp = levelInfo ? levelInfo.upExp : 20;
+            advisorExpHintEl.textContent = `${currentLevel}级升${currentLevel+1}级需${upExp}经验`;
+        }
+
+        // 活动返利基础配置
+        const rebateBaseConfig = {
+            yangyanPointsPer: 3,
+            changshengPointsPer: 7,
+            shengrenPointsPer: 15,
+            yangyanCost: 12,
+            changshengCost: 28,
+            shengrenCost: 60
+        };
+
+        // 军师核心计算逻辑
+        function calculateAdvisorMaterials() {
+            const currentLevel = parseInt(advisorCurrentLevelEl.value) || 1;
+            const currentExp = parseInt(advisorCurrentExpEl.value) || 0;
+            const targetLevel = parseInt(advisorTargetLevelEl.value) || 60;
+            const skillCount = parseInt(advisorSkillCountEl.value) || 1;
+            const smallYangyan = parseFloat(advisorSmallYangyanEl.value) || 35;
+            const smallChangsheng = parseFloat(advisorSmallChangshengEl.value) || 15;
+            const smallShengren = parseFloat(advisorSmallShengrenEl.value) || 7;
+            const bigToSmall = parseInt(advisorBigToSmallEl.value) || 1000;
+            const bigPrice = parseFloat(advisorBigPriceEl.value) || 0;
+            const enableRebate = advisorRebateToggleEl.checked;
+            
+            const customMaxPoints = parseInt(advisorMaxPointsEl.value) || 7118280;
+            const customYangyanMax = parseInt(advisorYangyanMaxEl.value) || 152100;
+            const customChangshengMax = parseInt(advisorChangshengMaxEl.value) || 91260;
+            const customShengrenMax = parseInt(advisorShengrenMaxEl.value) || 45630;
+
+            // 输入校验
+            if (currentLevel >= targetLevel) {
+                alert('目标等级必须大于当前等级！');
+                return;
+            }
+            if (targetLevel > 60) {
+                alert('目标等级最高为60级！');
+                return;
+            }
+            const currentLevelInfo = advisorData.find(item => item.level === currentLevel);
+            if (!currentLevelInfo) {
+                alert('未找到当前等级的配置数据！');
+                return;
+            }
+            if (currentExp > currentLevelInfo.upExp) {
+                alert(`${currentLevel}级当前经验不能超过${currentLevelInfo.upExp}！`);
+                return;
+            }
+
+            // 技能乘数（单条属性=1，单条技能=2）
+            const multiplier = skillCount === 1 ? 1 : 2;
+
+            // 计算材料总数
+            let totalYangyan = 0;
+            let totalChangsheng = 0;
+            let totalShengren = 0;
+
+            // 计算当前等级剩余部分
+            if (currentLevel < targetLevel) {
+                const remainingExpRatio = (currentLevelInfo.upExp - currentExp) / currentLevelInfo.upExp;
+                totalYangyan += Math.round(currentLevelInfo.yangyan * remainingExpRatio * multiplier);
+                totalChangsheng += Math.round(currentLevelInfo.changsheng * remainingExpRatio * multiplier);
+                totalShengren += Math.round(currentLevelInfo.shengren * remainingExpRatio * multiplier);
+            }
+
+            // 累加后续完整等级
+            for (let level = currentLevel + 1; level < targetLevel; level++) {
+                const levelInfo = advisorData.find(item => item.level === level);
+                if (levelInfo) {
+                    totalYangyan += levelInfo.yangyan * multiplier;
+                    totalChangsheng += levelInfo.changsheng * multiplier;
+                    totalShengren += levelInfo.shengren * multiplier;
+                }
+            }
+
+            // 计算材料包数量（基础计算）
+            let yangyanSmall = Math.ceil(totalYangyan / smallYangyan);
+            let changshengSmall = Math.ceil(totalChangsheng / smallChangsheng);
+            let shengrenSmall = Math.ceil(totalShengren / smallShengren);
+            let totalSmall = yangyanSmall + changshengSmall + shengrenSmall;
+            let totalBig = Math.ceil(totalSmall / bigToSmall);
+
+            // 计算总价格
+            const totalPrice = totalBig * bigPrice;
+            
+            // 更新基础结果显示
+            advisorTotalYangyanEl.textContent = totalYangyan.toLocaleString();
+            advisorTotalChangshengEl.textContent = totalChangsheng.toLocaleString();
+            advisorTotalShengrenEl.textContent = totalShengren.toLocaleString();
+            advisorYangyanSmallEl.textContent = yangyanSmall.toLocaleString();
+            advisorChangshengSmallEl.textContent = changshengSmall.toLocaleString();
+            advisorShengrenSmallEl.textContent = shengrenSmall.toLocaleString();
+            advisorTotalBigEl.textContent = totalBig.toLocaleString();
+            advisorTotalPriceEl.textContent = totalPrice.toFixed(2);
+
+            // 处理返利计算
+            if (enableRebate) {
+                advisorRebateCardEl.style.display = 'block';
+                calculateAdvisorRebate(totalYangyan, totalChangsheng, totalShengren, smallYangyan, smallChangsheng, smallShengren, bigToSmall, totalBig, bigPrice, customMaxPoints, customYangyanMax, customChangshengMax, customShengrenMax);
+            } else {
+                advisorRebateCardEl.style.display = 'none';
+            }
+        }
+
+        // 军师返利计算逻辑 - 优化版本（基于材料包效率）
+        function calculateAdvisorRebate(needYangyan, needChangsheng, needShengren, smallYangyan, smallChangsheng, smallShengren, bigToSmall, originalBig, bigPrice, maxPoints, yangyanMax, changshengMax, shengrenMax) {
+            let rebateYangyan = 0;
+            let rebateChangsheng = 0;
+            let rebateShengren = 0;
+            let totalPoints = 0;
+
+            let pointsFromYangyan = needYangyan * rebateBaseConfig.yangyanPointsPer;
+            let pointsFromChangsheng = needChangsheng * rebateBaseConfig.changshengPointsPer;
+            let pointsFromShengren = needShengren * rebateBaseConfig.shengrenPointsPer;
+            totalPoints = Math.min(pointsFromYangyan + pointsFromChangsheng + pointsFromShengren, maxPoints);
+
+            let tempPoints = totalPoints;
+            
+            // 计算每种材料的包效率（材料包中的数量）
+            const packageEfficiencyYangyan = smallYangyan;    // 阳炎符/包
+            const packageEfficiencyChangsheng = smallChangsheng; // 长生符/包
+            const packageEfficiencyShengren = smallShengren;   // 圣人符/包
+
+            // 按包效率和需求排序材料
+            const materials = [
+                { 
+                    type: 'yangyan', 
+                    packageEfficiency: packageEfficiencyYangyan, 
+                    need: needYangyan, 
+                    max: yangyanMax, 
+                    cost: rebateBaseConfig.yangyanCost, 
+                    rebate: () => rebateYangyan, 
+                    setRebate: (val) => rebateYangyan = val 
+                },
+                { 
+                    type: 'changsheng', 
+                    packageEfficiency: packageEfficiencyChangsheng, 
+                    need: needChangsheng, 
+                    max: changshengMax, 
+                    cost: rebateBaseConfig.changshengCost, 
+                    rebate: () => rebateChangsheng, 
+                    setRebate: (val) => rebateChangsheng = val 
+                },
+                { 
+                    type: 'shengren', 
+                    packageEfficiency: packageEfficiencyShengren, 
+                    need: needShengren, 
+                    max: shengrenMax, 
+                    cost: rebateBaseConfig.shengrenCost, 
+                    rebate: () => rebateShengren, 
+                    setRebate: (val) => rebateShengren = val 
+                }
+            ];
+
+            // 排序：包效率高的优先，效率相同则需求大的优先
+            materials.sort((a, b) => {
+                if (b.packageEfficiency !== a.packageEfficiency) {
+                    return b.packageEfficiency - a.packageEfficiency;
+                }
+                return b.need - a.need;
+            });
+
+            // 批量兑换材料
+            for (const material of materials) {
+                if (tempPoints <= 0) break;
+                
+                const maxRedeem = Math.min(
+                    Math.floor(tempPoints / material.cost),
+                    material.max - material.rebate(),
+                    material.need
+                );
+                
+                if (maxRedeem > 0) {
+                    material.setRebate(material.rebate() + maxRedeem);
+                    tempPoints -= maxRedeem * material.cost;
+                }
+            }
+
+            let netYangyan = Math.max(0, needYangyan - rebateYangyan);
+            let netChangsheng = Math.max(0, needChangsheng - rebateChangsheng);
+            let netShengren = Math.max(0, needShengren - rebateShengren);
+
+            let netYangyanSmall = Math.ceil(netYangyan / smallYangyan);
+            let netChangshengSmall = Math.ceil(netChangsheng / smallChangsheng);
+            let netShengrenSmall = Math.ceil(netShengren / smallShengren);
+            let netTotalSmall = netYangyanSmall + netChangshengSmall + netShengrenSmall;
+            let finalBig = Math.ceil(netTotalSmall / bigToSmall);
+            let savedBig = originalBig - finalBig;
+
+            // 计算价格
+            const rebatePrice = finalBig * bigPrice;
+            const savedPrice = originalBig * bigPrice - rebatePrice;
+            
+            advisorTotalPointsEl.textContent = totalPoints.toLocaleString();
+            advisorRebateYangyanEl.textContent = rebateYangyan.toLocaleString();
+            advisorRebateChangshengEl.textContent = rebateChangsheng.toLocaleString();
+            advisorRebateShengrenEl.textContent = rebateShengren.toLocaleString();
+            advisorRebateBigEl.textContent = finalBig.toLocaleString();
+            advisorSavedBigEl.textContent = savedBig.toLocaleString();
+            advisorRebatePriceEl.textContent = rebatePrice.toFixed(2);
+            advisorSavedPriceEl.textContent = savedPrice.toFixed(2);
+        }
+
+        advisorCalcBtn.addEventListener('click', calculateAdvisorMaterials);
+        advisorCalcBtn.addEventListener('touchstart', calculateAdvisorMaterials, { passive: true });
+
+        // 军师重置功能
+        function resetAdvisorCalculator() {
+            advisorCurrentLevelEl.value = 1;
+            advisorCurrentExpEl.value = 0;
+            advisorTargetLevelEl.value = 60;
+            advisorSkillCountEl.value = 1;
+            advisorSmallYangyanEl.value = 35;
+            advisorSmallChangshengEl.value = 15;
+            advisorSmallShengrenEl.value = 7;
+            advisorBigToSmallEl.value = 1000;
+            advisorBigPriceEl.value = 0;
+            advisorRebateToggleEl.checked = false;
+            advisorMaxPointsEl.value = 7118280;
+            advisorYangyanMaxEl.value = 152100;
+            advisorChangshengMaxEl.value = 91260;
+            advisorShengrenMaxEl.value = 45630;
+            updateAdvisorExpHint();
+            
+            // 重置结果显示
+            advisorTotalYangyanEl.textContent = '0';
+            advisorTotalChangshengEl.textContent = '0';
+            advisorTotalShengrenEl.textContent = '0';
+            advisorYangyanSmallEl.textContent = '0';
+            advisorChangshengSmallEl.textContent = '0';
+            advisorShengrenSmallEl.textContent = '0';
+            advisorTotalBigEl.textContent = '0';
+            advisorTotalPriceEl.textContent = '0';
+            advisorRebatePriceEl.textContent = '0';
+            advisorSavedPriceEl.textContent = '0';
+            
+            // 隐藏返利设置和结果
+            advisorRebateSettingsEl.style.display = 'none';
+            advisorRebateCardEl.style.display = 'none';
+        }
+
+        advisorResetBtn.addEventListener('click', resetAdvisorCalculator);
+        advisorResetBtn.addEventListener('touchstart', resetAdvisorCalculator, { passive: true });
+
+        // 军师初始化经验提示
+        updateAdvisorExpHint();
+
+        // ================================
+        // 祭坛计算器逻辑
+        // ================================
+        const altarData = [
+            { level: 1, totalMaterial: 9, expMin: 0, expMax: 30, times: 3 },
+            { level: 2, totalMaterial: 24, expMin: 30, expMax: 70, times: 4 },
+            { level: 3, totalMaterial: 45, expMin: 70, expMax: 120, times: 5 },
+            { level: 4, totalMaterial: 72, expMin: 120, expMax: 180, times: 6 },
+            { level: 5, totalMaterial: 105, expMin: 180, expMax: 250, times: 7 },
+            { level: 6, totalMaterial: 144, expMin: 250, expMax: 330, times: 8 },
+            { level: 7, totalMaterial: 189, expMin: 330, expMax: 420, times: 9 },
+            { level: 8, totalMaterial: 240, expMin: 420, expMax: 520, times: 10 },
+            { level: 9, totalMaterial: 297, expMin: 520, expMax: 630, times: 11 },
+            { level: 10, totalMaterial: 360, expMin: 630, expMax: 750, times: 12 },
+            { level: 11, totalMaterial: 429, expMin: 750, expMax: 880, times: 13 },
+            { level: 12, totalMaterial: 504, expMin: 880, expMax: 1020, times: 14 },
+            { level: 13, totalMaterial: 585, expMin: 1020, expMax: 1170, times: 15 },
+            { level: 14, totalMaterial: 672, expMin: 1170, expMax: 1330, times: 16 },
+            { level: 15, totalMaterial: 765, expMin: 1330, expMax: 1500, times: 17 },
+            { level: 16, totalMaterial: 864, expMin: 1500, expMax: 1680, times: 18 },
+            { level: 17, totalMaterial: 969, expMin: 1680, expMax: 1870, times: 19 },
+            { level: 18, totalMaterial: 1080, expMin: 1870, expMax: 2070, times: 20 },
+            { level: 19, totalMaterial: 1197, expMin: 2070, expMax: 2280, times: 21 },
+            { level: 20, totalMaterial: 1320, expMin: 2280, expMax: 2500, times: 22 },
+            { level: 21, totalMaterial: 1449, expMin: 2500, expMax: 2730, times: 23 },
+            { level: 22, totalMaterial: 1584, expMin: 2730, expMax: 2970, times: 24 },
+            { level: 23, totalMaterial: 1725, expMin: 2970, expMax: 3220, times: 25 },
+            { level: 24, totalMaterial: 1872, expMin: 3220, expMax: 3480, times: 26 },
+            { level: 25, totalMaterial: 2025, expMin: 3480, expMax: 3750, times: 27 },
+            { level: 26, totalMaterial: 2184, expMin: 3750, expMax: 4030, times: 28 },
+            { level: 27, totalMaterial: 2349, expMin: 4030, expMax: 4320, times: 29 },
+            { level: 28, totalMaterial: 2520, expMin: 4320, expMax: 4620, times: 30 },
+            { level: 29, totalMaterial: 2679, expMin: 4620, expMax: 4930, times: 31 },
+            { level: 30, totalMaterial: 2880, expMin: 4930, expMax: 5250, times: 32 },
+            { level: 31, totalMaterial: 3162, expMin: 5250, expMax: 5590, times: 34 },
+            { level: 32, totalMaterial: 3360, expMin: 5590, expMax: 5940, times: 35 },
+            { level: 33, totalMaterial: 3564, expMin: 5940, expMax: 6300, times: 36 },
+            { level: 34, totalMaterial: 3774, expMin: 6300, expMax: 6670, times: 37 },
+            { level: 35, totalMaterial: 3990, expMin: 6670, expMax: 7050, times: 38 },
+            { level: 36, totalMaterial: 4212, expMin: 7050, expMax: 7440, times: 39 },
+            { level: 37, totalMaterial: 4440, expMin: 7440, expMax: 7840, times: 40 },
+            { level: 38, totalMaterial: 4674, expMin: 7840, expMax: 8250, times: 41 },
+            { level: 39, totalMaterial: 4914, expMin: 8250, expMax: 8670, times: 42 },
+            { level: 40, totalMaterial: 5160, expMin: 8670, expMax: 9100, times: 43 },
+            { level: 41, totalMaterial: 5412, expMin: 9100, expMax: 9540, times: 44 },
+            { level: 42, totalMaterial: 5670, expMin: 9540, expMax: 9990, times: 45 },
+            { level: 43, totalMaterial: 5934, expMin: 9990, expMax: 10450, times: 46 },
+            { level: 44, totalMaterial: 6204, expMin: 10450, expMax: 10920, times: 47 },
+            { level: 45, totalMaterial: 6480, expMin: 10920, expMax: 11400, times: 48 },
+            { level: 46, totalMaterial: 6762, expMin: 11400, expMax: 11890, times: 49 },
+            { level: 47, totalMaterial: 7050, expMin: 11890, expMax: 12390, times: 50 },
+            { level: 48, totalMaterial: 7344, expMin: 12390, expMax: 12900, times: 51 },
+            { level: 49, totalMaterial: 7644, expMin: 12900, expMax: 13420, times: 52 },
+            { level: 50, totalMaterial: 8400, expMin: 13420, expMax: 13980, times: 56 },
+            { level: 51, totalMaterial: 8990, expMin: 13980, expMax: 14560, times: 58 },
+            { level: 52, totalMaterial: 9600, expMin: 14560, expMax: 15160, times: 60 },
+            { level: 53, totalMaterial: 10395, expMin: 15160, expMax: 15790, times: 63 },
+            { level: 54, totalMaterial: 11220, expMin: 15790, expMax: 16450, times: 66 },
+            { level: 55, totalMaterial: 12075, expMin: 16450, expMax: 17140, times: 69 },
+            { level: 56, totalMaterial: 13104, expMin: 17140, expMax: 17860, times: 72 },
+            { level: 57, totalMaterial: 14175, expMin: 17860, expMax: 18610, times: 75 },
+            { level: 58, totalMaterial: 15288, expMin: 18610, expMax: 19390, times: 78 },
+            { level: 59, totalMaterial: 16443, expMin: 19390, expMax: 20200, times: 81 },
+            { level: 60, totalMaterial: 17640, expMin: 20200, expMax: 21040, times: 84 },
+            { level: 61, totalMaterial: 19053, expMin: 21040, expMax: 21910, times: 87 },
+            { level: 62, totalMaterial: 20520, expMin: 21910, expMax: 22810, times: 90 },
+            { level: 63, totalMaterial: 22278, expMin: 22810, expMax: 23750, times: 94 },
+            { level: 64, totalMaterial: 24108, expMin: 23750, expMax: 24730, times: 98 },
+            { level: 65, totalMaterial: 26010, expMin: 24730, expMax: 25750, times: 102 },
+            { level: 66, totalMaterial: 27664, expMin: 25750, expMax: 26810, times: 106 },
+            { level: 67, totalMaterial: 30470, expMin: 26810, expMax: 27910, times: 110 },
+            { level: 68, totalMaterial: 33120, expMin: 27910, expMax: 29060, times: 115 },
+            { level: 69, totalMaterial: 35880, expMin: 29060, expMax: 30260, times: 120 },
+            { level: 70, totalMaterial: 37200, expMin: 30260, expMax: 31460, times: 120 },
+            { level: 71, totalMaterial: 44940, expMin: 31460, expMax: 32860, times: 140 },
+            { level: 72, totalMaterial: 48140, expMin: 32860, expMax: 34310, times: 145 },
+            { level: 73, totalMaterial: 51450, expMin: 34310, expMax: 35810, times: 150 },
+            { level: 74, totalMaterial: 54870, expMin: 35810, expMax: 37360, times: 155 },
+            { level: 75, totalMaterial: 58400, expMin: 37360, expMax: 38960, times: 160 },
+            { level: 76, totalMaterial: 62040, expMin: 38960, expMax: 40610, times: 165 },
+            { level: 77, totalMaterial: 65790, expMin: 40610, expMax: 42310, times: 170 },
+            { level: 78, totalMaterial: 69650, expMin: 42310, expMax: 44060, times: 175 },
+            { level: 79, totalMaterial: 73620, expMin: 44060, expMax: 45860, times: 180 },
+            { level: 80, totalMaterial: 79800, expMin: 45860, expMax: 47760, times: 190 },
+            { level: 81, totalMaterial: 86200, expMin: 47760, expMax: 49760, times: 200 },
+            { level: 82, totalMaterial: 92820, expMin: 49760, expMax: 51860, times: 210 },
+            { level: 83, totalMaterial: 99660, expMin: 51860, expMax: 54060, times: 220 },
+            { level: 84, totalMaterial: 106720, expMin: 54060, expMax: 56360, times: 230 },
+            { level: 85, totalMaterial: 116375, expMin: 56360, expMax: 58810, times: 245 },
+            { level: 86, totalMaterial: 126360, expMin: 58810, expMax: 61410, times: 260 },
+            { level: 87, totalMaterial: 136675, expMin: 61410, expMax: 64160, times: 275 },
+            { level: 88, totalMaterial: 147320, expMin: 64160, expMax: 67060, times: 290 },
+            { level: 89, totalMaterial: 158295, expMin: 67060, expMax: 70110, times: 305 }
+        ];
+
+        // 祭坛DOM元素
+        const altarCurrentLevelEl = document.getElementById('altar-current-level');
+        const altarCurrentExpEl = document.getElementById('altar-current-exp');
+        const altarTargetLevelEl = document.getElementById('altar-target-level');
+        const altarExpHintEl = document.getElementById('altar-exp-hint');
+        const altarSmallMaterialEl = document.getElementById('altar-small-material');
+        const altarBigToSmallEl = document.getElementById('altar-big-to-small');
+        const altarCalcBtn = document.getElementById('altar-calc-btn');
+        const altarResetBtn = document.getElementById('altar-reset-btn');
+        
+        // 祭坛结果元素
+        const altarTotalMaterialEl = document.getElementById('altar-total-material');
+        const altarTotalExpEl = document.getElementById('altar-total-exp');
+        const altarTotalTimesEl = document.getElementById('altar-total-times');
+        const altarSmallPackageEl = document.getElementById('altar-small-package');
+        const altarBigPackageEl = document.getElementById('altar-big-package');
+
+        // 祭坛返利设置元素
+        const altarRebateToggleEl = document.getElementById('altar-rebate-toggle');
+        const altarRebateSettingsEl = document.getElementById('altar-rebate-settings');
+        const altarMaxPointsEl = document.getElementById('altar-max-points');
+        const altarMaterialMaxEl = document.getElementById('altar-material-max');
+        
+        // 祭坛返利结果元素
+        const altarRebateCardEl = document.getElementById('altar-rebate-card');
+        const altarTotalPointsEl = document.getElementById('altar-total-points');
+        const altarRebateMaterialEl = document.getElementById('altar-rebate-material');
+        const altarRebateBigEl = document.getElementById('altar-rebate-big');
+        const altarSavedBigEl = document.getElementById('altar-saved-big');
+        
+        // 祭坛价格相关元素
+        const altarBigPriceEl = document.getElementById('altar-big-price');
+        const altarTotalPriceEl = document.getElementById('altar-total-price');
+        const altarRebatePriceEl = document.getElementById('altar-rebate-price');
+        const altarSavedPriceEl = document.getElementById('altar-saved-price');
+        
+        // 祭坛活动返利基础配置
+        const altarRebateBaseConfig = {
+            pointsPer: 5,
+            cost: 20
+        };
+        
+        // 祭坛返利开关事件
+        altarRebateToggleEl.addEventListener('change', function() {
+            if (this.checked) {
+                altarRebateSettingsEl.style.display = 'block';
+            } else {
+                altarRebateSettingsEl.style.display = 'none';
+            }
+        });
+
+        // 祭坛实时更新经验提示
+        altarCurrentLevelEl.addEventListener('input', updateAltarExpHint);
+        altarCurrentLevelEl.addEventListener('change', updateAltarExpHint);
+        
+        function updateAltarExpHint() {
+            const currentLevel = parseInt(altarCurrentLevelEl.value) || 1;
+            const levelInfo = altarData.find(item => item.level === currentLevel);
+            if (levelInfo) {
+                const expNeeded = levelInfo.expMax - levelInfo.expMin;
+                altarExpHintEl.textContent = `${currentLevel}级经验范围${levelInfo.expMin}-${levelInfo.expMax}，升${currentLevel+1}级需要${expNeeded}经验`;
+            }
+        }
+
+        // 祭坛核心计算逻辑
+        function calculateAltarMaterials() {
+            const currentLevel = parseInt(altarCurrentLevelEl.value) || 1;
+            const currentExp = parseInt(altarCurrentExpEl.value) || 0;
+            const targetLevel = parseInt(altarTargetLevelEl.value) || 90;
+            const smallMaterial = parseInt(altarSmallMaterialEl.value) || 100;
+            const bigToSmall = parseInt(altarBigToSmallEl.value) || 100;
+            const bigPrice = parseFloat(altarBigPriceEl.value) || 0;
+            const enableRebate = altarRebateToggleEl.checked;
+            
+            const customMaxPoints = parseInt(altarMaxPointsEl.value) || 6300000;
+            const customMaterialMax = parseInt(altarMaterialMaxEl.value) || 45000;
+
+            // 输入校验
+            if (currentLevel >= targetLevel) {
+                alert('目标等级必须大于当前等级！');
+                return;
+            }
+            if (targetLevel > 90) {
+                alert('目标等级最高为90级！');
+                return;
+            }
+            if (currentLevel < 1 || currentLevel > 89) {
+                alert('当前等级必须在1-89之间！');
+                return;
+            }
+
+            // 查找当前等级信息
+            const currentLevelInfo = altarData.find(item => item.level === currentLevel);
+            if (!currentLevelInfo) {
+                alert('未找到当前等级的配置数据！');
+                return;
+            }
+
+            // 检查当前经验是否在有效范围内
+            if (currentExp < currentLevelInfo.expMin || currentExp >= currentLevelInfo.expMax) {
+                alert(`${currentLevel}级当前经验必须在${currentLevelInfo.expMin}-${currentLevelInfo.expMax - 1}之间！`);
+                return;
+            }
+
+            // 计算所需材料、经验和次数
+            let totalMaterial = 0;
+            let totalExp = 0;
+            let totalTimes = 0;
+
+            // 1. 计算当前等级剩余部分
+            if (currentLevel < targetLevel) {
+                const currentExpNeeded = currentLevelInfo.expMax - currentLevelInfo.expMin;
+                const currentExpInLevel = currentExp - currentLevelInfo.expMin;
+                const currentExpProgress = currentExpInLevel / currentExpNeeded;
+                const currentMaterialUsed = Math.round(currentLevelInfo.totalMaterial * currentExpProgress);
+                const currentMaterialRemaining = currentLevelInfo.totalMaterial - currentMaterialUsed;
+                const currentTimesUsed = Math.round(currentLevelInfo.times * currentExpProgress);
+                const currentTimesRemaining = currentLevelInfo.times - currentTimesUsed;
+                const currentExpRemaining = currentLevelInfo.expMax - currentExp;
+
+                totalMaterial += currentMaterialRemaining;
+                totalExp += currentExpRemaining;
+                totalTimes += currentTimesRemaining;
+            }
+
+            // 2. 累加后续完整等级
+            for (let level = currentLevel + 1; level < targetLevel; level++) {
+                const levelInfo = altarData.find(item => item.level === level);
+                if (levelInfo) {
+                    totalMaterial += levelInfo.totalMaterial;
+                    totalExp += (levelInfo.expMax - levelInfo.expMin);
+                    totalTimes += levelInfo.times;
+                }
+            }
+
+            // 3. 计算材料包需求
+            const smallPackage = Math.ceil(totalMaterial / smallMaterial);
+            const bigPackage = Math.ceil(smallPackage / bigToSmall);
+
+            // 计算总价格
+            const totalPrice = bigPackage * bigPrice;
+            
+            // 4. 更新结果显示
+            altarTotalMaterialEl.textContent = totalMaterial.toLocaleString();
+            altarTotalExpEl.textContent = totalExp.toLocaleString();
+            altarTotalTimesEl.textContent = totalTimes.toLocaleString();
+            altarSmallPackageEl.textContent = smallPackage.toLocaleString();
+            altarBigPackageEl.textContent = bigPackage.toLocaleString();
+            altarTotalPriceEl.textContent = totalPrice.toFixed(2);
+
+            // 处理返利计算
+            if (enableRebate) {
+                altarRebateCardEl.style.display = 'block';
+                calculateAltarRebate(currentLevel, totalMaterial, smallMaterial, bigToSmall, bigPackage, bigPrice, customMaxPoints, customMaterialMax);
+            } else {
+                altarRebateCardEl.style.display = 'none';
+            }
+        }
+
+        altarCalcBtn.addEventListener('click', calculateAltarMaterials);
+        altarCalcBtn.addEventListener('touchstart', calculateAltarMaterials, { passive: true });
+
+        // 祭坛返利计算逻辑
+        function calculateAltarRebate(currentLevel, needMaterial, smallMaterial, bigToSmall, originalBig, bigPrice, maxPoints, materialMax) {
+            let rebateMaterial = 0;
+            let totalPoints = 0;
+
+            // 计算获得的积分
+            totalPoints = Math.min(needMaterial * altarRebateBaseConfig.pointsPer, maxPoints);
+
+            let tempPoints = totalPoints;
+            
+            // 兑换祭坛材料（只有一种材料，直接兑换）
+            if (tempPoints > 0) {
+                let canRedeem = Math.min(Math.floor(tempPoints / altarRebateBaseConfig.cost), materialMax, needMaterial);
+                if (canRedeem > 0) {
+                    rebateMaterial += canRedeem;
+                }
+            }
+
+            let netMaterial = Math.max(0, needMaterial - rebateMaterial);
+            let netSmallPackage = Math.ceil(netMaterial / smallMaterial);
+            let finalBig = Math.ceil(netSmallPackage / bigToSmall);
+            let savedBig = originalBig - finalBig;
+
+            // 计算价格
+            const rebatePrice = finalBig * bigPrice;
+            const savedPrice = originalBig * bigPrice - rebatePrice;
+            
+            altarTotalPointsEl.textContent = totalPoints.toLocaleString();
+            altarRebateMaterialEl.textContent = rebateMaterial.toLocaleString();
+            altarRebateBigEl.textContent = finalBig.toLocaleString();
+            altarSavedBigEl.textContent = savedBig.toLocaleString();
+            altarRebatePriceEl.textContent = rebatePrice.toFixed(2);
+            altarSavedPriceEl.textContent = savedPrice.toFixed(2);
+        }
+
+        // 祭坛重置功能
+        function resetAltarCalculator() {
+            altarCurrentLevelEl.value = 1;
+            altarCurrentExpEl.value = 0;
+            altarTargetLevelEl.value = 90;
+            altarSmallMaterialEl.value = 100;
+            altarBigToSmallEl.value = 100;
+            altarBigPriceEl.value = 0;
+            altarRebateToggleEl.checked = false;
+            altarMaxPointsEl.value = 6300000;
+            altarMaterialMaxEl.value = 45000;
+            updateAltarExpHint();
+            
+            // 重置结果显示
+            altarTotalMaterialEl.textContent = '0';
+            altarTotalExpEl.textContent = '0';
+            altarTotalTimesEl.textContent = '0';
+            altarSmallPackageEl.textContent = '0';
+            altarBigPackageEl.textContent = '0';
+            altarTotalPriceEl.textContent = '0';
+            altarRebatePriceEl.textContent = '0';
+            altarSavedPriceEl.textContent = '0';
+            
+            // 隐藏返利设置和结果
+            altarRebateSettingsEl.style.display = 'none';
+            altarRebateCardEl.style.display = 'none';
+        }
+
+        altarResetBtn.addEventListener('click', resetAltarCalculator);
+        altarResetBtn.addEventListener('touchstart', resetAltarCalculator, { passive: true });
+
+        // 祭坛初始化经验提示
+        updateAltarExpHint();
+        
+
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            // 添加iOS Safari特定优化
+            if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                document.body.classList.add('ios-device');
+            }
+            
+            // 优化触摸事件处理，防止卡顿
+            let touchStartY = 0;
+            let isScrolling = false;
+            
+            document.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+                isScrolling = false;
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', (e) => {
+                const touchEndY = e.touches[0].clientY;
+                const diff = Math.abs(touchEndY - touchStartY);
+                
+                if (diff > 5) {
+                    isScrolling = true;
+                }
+            }, { passive: true });
+            
+            // 只在按钮上添加点击事件处理
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('touchend', (e) => {
+                    if (isScrolling) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                }, { passive: false });
+            });
+        });
+    </script>
+<div class="liangshan-foot">
+    <span>点算司 · 数据取自吧友攻略图</span>
+    <span class="stars">★ 天罡 ★ 地煞 ★</span>
+</div>
+</body>
+</html>
