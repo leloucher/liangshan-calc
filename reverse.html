@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>梁山点算司 · 能升多少级</title>
+<style>
+:root{--ink:#12100f;--paper:#f2e5c8;--gold:#d8a72b;--red:#b02b2b;--red2:#7d1c1c;--jade:#2f6b5f;--muted:#a99574}
+*{box-sizing:border-box}
+body{
+  margin:0;padding:18px 12px 44px;min-height:100vh;color:var(--paper);
+  font-family:"Noto Serif SC","Songti SC","STSong",serif;
+  background:radial-gradient(900px 480px at 50% -10%,#2a2118 0%,transparent 62%),linear-gradient(160deg,#171310 0%,#0d0b0a 100%);
+  position:relative;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.1;
+  background-image:repeating-radial-gradient(circle at 50% 118%,transparent 0 40px,#d8a72b 41px 42px);
+  -webkit-mask-image:linear-gradient(to top,#000 0,transparent 60%);mask-image:linear-gradient(to top,#000 0,transparent 60%);
+}
+.wrap{max-width:820px;margin:0 auto;position:relative;z-index:2}
+.head{display:flex;align-items:center;gap:12px;margin:4px 2px 16px;border-bottom:1px solid rgba(216,167,43,.28);padding-bottom:12px}
+.seal{width:52px;height:52px;flex:0 0 52px;border-radius:11px;background:linear-gradient(145deg,var(--red),var(--red2));
+  color:#f6e7c6;display:grid;place-items:center;font-weight:700;font-size:15px;line-height:1.1;text-align:center;letter-spacing:1px;
+  box-shadow:inset 0 0 0 2px rgba(246,231,198,.55)}
+.head h1{margin:0 0 3px;font-size:20px;letter-spacing:3px;color:#f0d38c;font-weight:600}
+.head p{margin:0;font-size:12px;color:var(--muted);letter-spacing:1px}
+.tabs{display:flex;background:rgba(28,24,21,.9);border:1px solid rgba(216,167,43,.25);border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 8px 28px rgba(0,0,0,.5)}
+.tab{flex:1;padding:14px 0;border:none;background:transparent;cursor:pointer;color:#a99574;font-size:15px;font-family:inherit;letter-spacing:1px;transition:.18s}
+.tab:hover{color:#f0d38c;background:rgba(216,167,43,.08)}
+.tab.active{color:#1a1512;font-weight:700;background:linear-gradient(180deg,#e8c372,#c79428);box-shadow:inset 0 0 0 1px rgba(246,231,198,.5)}
+.panel{display:none;background:linear-gradient(180deg,rgba(30,26,22,.97),rgba(19,16,14,.98));border:1px solid rgba(216,167,43,.32);
+  border-radius:18px;padding:18px;box-shadow:0 18px 60px rgba(0,0,0,.6),inset 0 0 0 6px rgba(216,167,43,.05);position:relative}
+.panel.active{display:block}
+.panel::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,transparent,#d8a72b,transparent);opacity:.75}
+.panel h2{margin:2px 0 14px;font-size:18px;letter-spacing:2px;color:#f0d38c;font-weight:600;text-align:center;padding-bottom:10px;border-bottom:1px dashed rgba(216,167,43,.2)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;color:#cdb894;letter-spacing:.5px}
+.field input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid rgba(216,167,43,.2);background:rgba(0,0,0,.35);
+  color:#f2e5c8;font-family:ui-monospace,Menlo,monospace;font-size:15px;outline:none;transition:.18s}
+.field input:focus{border-color:rgba(216,167,43,.65);box-shadow:0 0 0 3px rgba(216,167,43,.12)}
+.bts{display:flex;gap:12px;margin:16px 0 4px}
+.btn{flex:1;padding:14px 0;border-radius:12px;border:1px solid rgba(216,167,43,.3);cursor:pointer;font-size:16px;font-family:inherit;
+  letter-spacing:2px;transition:transform .06s,box-shadow .18s,background .18s;box-shadow:0 4px 0 rgba(0,0,0,.5)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
+.calc{background:linear-gradient(180deg,var(--red),var(--red2));color:#f7e9c8;font-weight:700}
+.reset{background:linear-gradient(180deg,#2a3f3a,#1b2a27);color:#bfe0d4}
+.result{margin-top:14px}
+.big{display:flex;align-items:baseline;justify-content:center;gap:10px;padding:18px 10px;border:1px solid rgba(216,167,43,.25);
+  border-radius:14px;background:radial-gradient(400px 120px at 50% 0,rgba(216,167,43,.14),rgba(0,0,0,.3));margin-bottom:12px}
+.big .num{font-family:ui-monospace,Menlo,monospace;font-size:44px;color:#f0d38c;text-shadow:0 0 22px rgba(216,167,43,.3)}
+.big .unit{font-size:14px;color:#cdb894;letter-spacing:1px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.cell{background:rgba(0,0,0,.3);border:1px solid rgba(216,167,43,.14);border-radius:12px;padding:12px 6px;text-align:center}
+.cell .k{font-size:12px;color:#a99574;letter-spacing:1px;margin-bottom:6px}
+.cell .v{font-family:ui-monospace,Menlo,monospace;font-size:18px;color:#f0d38c;word-break:break-all}
+.hint{margin-top:12px;font-size:12.5px;color:#a9c9bf;background:rgba(47,107,95,.14);border-left:3px solid var(--jade);
+  border-radius:0 10px 10px 0;padding:10px 12px;line-height:1.7}
+.foot{margin-top:20px;display:flex;justify-content:space-between;font-size:11px;color:#7d6b50;letter-spacing:1px}
+.foot .stars{color:#c9a34a;letter-spacing:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="seal">替天<br/>行道</div>
+    <div>
+      <h1>梁山点算司</h1>
+      <p>填进去算能升多少级 · 神兽 / 神装 / 军师 / 祭坛</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-sys="beast">神兽</button>
+    <button class="tab" data-sys="armor">神装</button>
+    <button class="tab" data-sys="advisor">军师</button>
+    <button class="tab" data-sys="altar">祭坛</button>
+  </div>
+
+  <section class="panel active" id="panel-beast">
+    <h2>神兽 · 手上这点货能升到几级</h2>
+    <div class="grid">
+      <div class="field"><label>当前等级（1-80）</label><input type="number" id="beast-level" value="1" min="1" max="80"></div>
+      <div class="field"><label>当前经验值</label><input type="number" id="beast-exp" value="0" min="0"></div>
+      <div class="field"><label>手上还有多少经验</label><input type="number" id="beast-expool" value="0" min="0"></div>
+      <div class="field"><label>灵草</label><input type="number" id="beast-grass" value="0" min="0"></div>
+      <div class="field"><label>灵木</label><input type="number" id="beast-wood" value="0" min="0"></div>
+      <div class="field"><label>灵丹</label><input type="number" id="beast-pill" value="0" min="0"></div>
+    </div>
+    <div class="bts"><button class="btn calc" data-calc="beast">算算能升多少</button><button class="btn reset" data-reset="beast">重置</button></div>
+    <div class="result" id="res-beast"></div>
+  </section>
+
+  <section class="panel" id="panel-armor">
+    <h2>神装 · 手上这点货能升到几级</h2>
+    <div class="grid">
+      <div class="field"><label>当前等级（1-60）</label><input type="number" id="armor-level" value="1" min="1" max="60"></div>
+      <div class="field"><label>当前经验值</label><input type="number" id="armor-exp" value="0" min="0"></div>
+      <div class="field"><label>手上还有多少经验</label><input type="number" id="armor-expool" value="0" min="0"></div>
+      <div class="field"><label>云母石</label><input type="number" id="armor-yunmu" value="0" min="0"></div>
+      <div class="field"><label>乌金石</label><input type="number" id="armor-wujin" value="0" min="0"></div>
+      <div class="field"><label>金刚石</label><input type="number" id="armor-jingang" value="0" min="0"></div>
+      <div class="field"><label>黑曜石</label><input type="number" id="armor-heiyao" value="0" min="0"></div>
+    </div>
+    <div class="bts"><button class="btn calc" data-calc="armor">算算能升多少</button><button class="btn reset" data-reset="armor">重置</button></div>
+    <div class="result" id="res-armor"></div>
+  </section>
+
+  <section class="panel" id="panel-advisor">
+    <h2>军师 · 手上这点货能升到几级</h2>
+    <div class="grid">
+      <div class="field"><label>当前等级（1-60）</label><input type="number" id="advisor-level" value="1" min="1" max="60"></div>
+      <div class="field"><label>当前经验值</label><input type="number" id="advisor-exp" value="0" min="0"></div>
+      <div class="field"><label>手上还有多少经验</label><input type="number" id="advisor-expool" value="0" min="0"></div>
+      <div class="field"><label>阳炎符</label><input type="number" id="advisor-yangyan" value="0" min="0"></div>
+      <div class="field"><label>长生符</label><input type="number" id="advisor-changsheng" value="0" min="0"></div>
+      <div class="field"><label>圣人符</label><input type="number" id="advisor-shengren" value="0" min="0"></div>
+      <div class="field"><label>升级类型</label>
+        <select id="advisor-mode" style="padding:11px 12px;border-radius:10px;border:1px solid rgba(216,167,43,.2);background:rgba(0,0,0,.35);color:#f2e5c8;font-family:inherit">
+          <option value="1">单条属性</option>
+          <option value="2">单条技能</option>
+          <option value="3">三条技能</option>
+        </select>
+      </div>
+    </div>
+    <div class="bts"><button class="btn calc" data-calc="advisor">算算能升多少</button><button class="btn reset" data-reset="advisor">重置</button></div>
+    <div class="result" id="res-advisor"></div>
+  </section>
+
+  <section class="panel" id="panel-altar">
+    <h2>祭坛 · 手上这点材料能升到几级</h2>
+    <div class="grid">
+      <div class="field"><label>当前等级（1-90）</label><input type="number" id="altar-level" value="1" min="1" max="90"></div>
+      <div class="field"><label>祭坛材料</label><input type="number" id="altar-totalMaterial" value="0" min="0"></div>
+    </div>
+    <div class="bts"><button class="btn calc" data-calc="altar">算算能升多少</button><button class="btn reset" data-reset="altar">重置</button></div>
+    <div class="result" id="res-altar"></div>
+  </section>
+
+  <div class="foot"><span>点算司 · 数据取自吧友攻略图</span><span class="stars">★ 天罡 ★ 地煞 ★</span></div>
+</div>
+
+<script>
+const beastLevelData = [
+            { level: 1, upExp: 20, grass: 8, wood: 0, pill: 0 },
+            { level: 2, upExp: 60, grass: 36, wood: 0, pill: 0 },
+            { level: 3, upExp: 120, grass: 96, wood: 0, pill: 0 },
+            { level: 4, upExp: 200, grass: 200, wood: 0, pill: 0 },
+            { level: 5, upExp: 300, grass: 360, wood: 0, pill: 0 },
+            { level: 6, upExp: 420, grass: 546, wood: 234, pill: 0 },
+            { level: 7, upExp: 560, grass: 816, wood: 408, pill: 0 },
+            { level: 8, upExp: 720, grass: 1170, wood: 650, pill: 0 },
+            { level: 9, upExp: 900, grass: 1640, wood: 984, pill: 0 },
+            { level: 10, upExp: 1100, grass: 2200, wood: 1400, pill: 0 },
+            { level: 11, upExp: 1320, grass: 2640, wood: 1760, pill: 0 },
+            { level: 12, upExp: 1560, grass: 3380, wood: 2340, pill: 1040 },
+            { level: 13, upExp: 1820, grass: 4256, wood: 3040, pill: 1520 },
+            { level: 14, upExp: 2100, grass: 5250, wood: 3850, pill: 2100 },
+            { level: 15, upExp: 2400, grass: 6400, wood: 4800, pill: 2800 },
+            { level: 16, upExp: 2720, grass: 7106, wood: 5434, pill: 3344 },
+            { level: 17, upExp: 3060, grass: 8460, wood: 6580, pill: 4230 },
+            { level: 18, upExp: 3420, grass: 9994, wood: 7890, pill: 5260 },
+            { level: 19, upExp: 3800, grass: 11720, wood: 9376, pill: 6446 },
+            { level: 20, upExp: 4200, grass: 13566, wood: 10982, pill: 7752 },
+            { level: 21, upExp: 4620, grass: 14520, wood: 11880, pill: 8580 },
+            { level: 22, upExp: 5060, grass: 16606, wood: 13718, pill: 10108 },
+            { level: 23, upExp: 5520, grass: 18912, wood: 15760, pill: 11820 },
+            { level: 24, upExp: 6000, grass: 21450, wood: 18018, pill: 13728 },
+            { level: 25, upExp: 6500, grass: 24128, wood: 20416, pill: 15776 },
+            { level: 26, upExp: 7020, grass: 25272, wood: 21528, pill: 16848 },
+            { level: 27, upExp: 7560, grass: 28224, wood: 24192, pill: 19152 },
+            { level: 28, upExp: 8120, grass: 31436, wood: 27100, pill: 21680 },
+            { level: 29, upExp: 8700, grass: 34800, wood: 30160, pill: 24360 },
+            { level: 30, upExp: 9300, grass: 38440, wood: 33480, pill: 27280 },
+            { level: 31, upExp: 9920, grass: 39680, wood: 34720, pill: 28520 },
+            { level: 32, upExp: 10560, grass: 43560, wood: 38280, pill: 31680 },
+            { level: 33, upExp: 11220, grass: 47668, wood: 42060, pill: 35050 },
+            { level: 34, upExp: 11900, grass: 52080, wood: 46128, pill: 38688 },
+            { level: 35, upExp: 12600, grass: 56664, wood: 50368, pill: 42498 },
+            { level: 36, upExp: 13320, grass: 58016, wood: 51744, pill: 43904 },
+            { level: 37, upExp: 14060, grass: 62852, wood: 56236, pill: 47966 },
+            { level: 38, upExp: 14820, grass: 68016, wood: 61040, pill: 52320 },
+            { level: 39, upExp: 15000, grass: 70560, wood: 63504, pill: 54684 },
+            { level: 40, upExp: 17000, grass: 79296, wood: 71744, pill: 62304 },
+            { level: 41, upExp: 19000, grass: 92928, wood: 84480, pill: 73920 },
+            { level: 42, upExp: 21000, grass: 107364, wood: 98028, pill: 86358 },
+            { level: 43, upExp: 23000, grass: 122592, wood: 112376, pill: 99606 },
+            { level: 44, upExp: 25000, grass: 131600, wood: 121072, pill: 107912 },
+            { level: 45, upExp: 27000, grass: 147784, wood: 136416, pill: 122206 },
+            { level: 46, upExp: 29000, grass: 164916, wood: 152700, pill: 137430 },
+            { level: 47, upExp: 31000, grass: 182672, wood: 169624, pill: 153314 },
+            { level: 48, upExp: 33000, grass: 191400, wood: 178200, pill: 161700 },
+            { level: 49, upExp: 35000, grass: 210000, wood: 196000, pill: 178500 },
+            { level: 50, upExp: 37000, grass: 229400, wood: 214600, pill: 196100 },
+            { level: 51, upExp: 39000, grass: 249600, wood: 234000, pill: 214500 },
+            { level: 52, upExp: 41000, grass: 257796, wood: 242172, pill: 222642 },
+            { level: 53, upExp: 43000, grass: 278392, wood: 262016, pill: 241546 },
+            { level: 54, upExp: 45000, grass: 300020, wood: 282876, pill: 261446 },
+            { level: 55, upExp: 47000, grass: 322272, wood: 304368, pill: 281988 },
+            { level: 56, upExp: 49000, grass: 329596, wood: 311780, pill: 289510 },
+            { level: 57, upExp: 51000, grass: 352488, wood: 333936, pill: 310746 },
+            { level: 58, upExp: 53000, grass: 375804, wood: 356532, pill: 332442 },
+            { level: 59, upExp: 55000, grass: 400000, wood: 380000, pill: 355000 },
+            { level: 60, upExp: 57000, grass: 424924, wood: 404196, pill: 378286 },
+            { level: 61, upExp: 59000, grass: 430920, wood: 410400, pill: 384750 },
+            { level: 62, upExp: 61000, grass: 456144, wood: 434928, pill: 408408 },
+            { level: 63, upExp: 63000, grass: 462000, wood: 441000, pill: 414750 },
+            { level: 64, upExp: 65000, grass: 487440, wood: 465776, pill: 438696 },
+            { level: 65, upExp: 67000, grass: 493120, wood: 471680, pill: 444880 },
+            { level: 66, upExp: 69000, grass: 518880, wood: 496800, pill: 469200 },
+            { level: 67, upExp: 71000, grass: 524352, wood: 502504, pill: 475194 },
+            { level: 68, upExp: 73000, grass: 550368, wood: 527904, pill: 499824 },
+            { level: 69, upExp: 75000, grass: 555600, wood: 533376, pill: 505596 },
+            { level: 70, upExp: 77000, grass: 581808, wood: 558992, pill: 530472 },
+            { level: 71, upExp: 79000, grass: 586768, wood: 564200, pill: 535990 },
+            { level: 72, upExp: 81000, grass: 613316, wood: 590172, pill: 561242 },
+            { level: 73, upExp: 83000, grass: 618192, wood: 595296, pill: 566676 },
+            { level: 74, upExp: 85000, grass: 644820, wood: 621372, pill: 592062 },
+            { level: 75, upExp: 87000, grass: 649600, wood: 626400, pill: 597400 },
+            { level: 76, upExp: 89000, grass: 676476, wood: 652740, pill: 623070 },
+            { level: 77, upExp: 91000, grass: 680920, wood: 657440, pill: 628090 },
+            { level: 78, upExp: 93000, grass: 708000, wood: 684000, pill: 654000 },
+            { level: 79, upExp: 95000, grass: 712560, wood: 688808, pill: 659118 }
+        ];
+const armorData = [
+            // 1-20级（云母、乌金、金刚、黑曜）
+            { level: 1, expNeed: 15, yunmu: 6, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 2, expNeed: 40, yunmu: 15, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 3, expNeed: 90, yunmu: 63, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 4, expNeed: 160, yunmu: 126, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 5, expNeed: 250, yunmu: 253, wujin: 0, jingang: 0, heiyao: 0 },
+            { level: 6, expNeed: 360, yunmu: 390, wujin: 150, jingang: 0, heiyao: 0 },
+            { level: 7, expNeed: 490, yunmu: 615, wujin: 287, jingang: 0, heiyao: 0 },
+            { level: 8, expNeed: 640, yunmu: 901, wujin: 477, jingang: 0, heiyao: 0 },
+            { level: 9, expNeed: 810, yunmu: 1292, wujin: 748, jingang: 0, heiyao: 0 },
+            { level: 10, expNeed: 1000, yunmu: 1743, wujin: 1079, jingang: 0, heiyao: 0 },
+            { level: 11, expNeed: 1210, yunmu: 2139, wujin: 1395, jingang: 0, heiyao: 0 },
+            { level: 12, expNeed: 1440, yunmu: 2775, wujin: 1887, jingang: 777, heiyao: 0 },
+            { level: 13, expNeed: 1690, yunmu: 3510, wujin: 2470, jingang: 1170, heiyao: 0 },
+            { level: 14, expNeed: 1960, yunmu: 4379, wujin: 3171, jingang: 1661, heiyao: 0 },
+            { level: 15, expNeed: 2250, yunmu: 5363, wujin: 3979, jingang: 2249, heiyao: 0 },
+            { level: 16, expNeed: 2560, yunmu: 6039, wujin: 4575, jingang: 2745, heiyao: 0 },
+            { level: 17, expNeed: 2890, yunmu: 7210, wujin: 5562, jingang: 3502, heiyao: 0 },
+            { level: 18, expNeed: 3240, yunmu: 8547, wujin: 6699, jingang: 4389, heiyao: 0 },
+            { level: 19, expNeed: 3610, yunmu: 10062, wujin: 7998, jingang: 5418, heiyao: 0 },
+            { level: 20, expNeed: 4000, yunmu: 0, wujin: 8811, jingang: 6141, heiyao: 1869 },
+            // 21-44级（乌金、金刚、黑曜）
+            { level: 21, expNeed: 4410, yunmu: 0, wujin: 9660, jingang: 6900, heiyao: 2484 },
+            { level: 22, expNeed: 4840, yunmu: 0, wujin: 10508, jingang: 7668, heiyao: 3124 },
+            { level: 23, expNeed: 5290, yunmu: 0, wujin: 10878, jingang: 8526, heiyao: 3822 },
+            { level: 24, expNeed: 5760, yunmu: 0, wujin: 11817, jingang: 9393, heiyao: 4545 },
+            { level: 25, expNeed: 6250, yunmu: 0, wujin: 13489, jingang: 7238, heiyao: 5593 },
+            { level: 26, expNeed: 6760, yunmu: 0, wujin: 15308, jingang: 8544, heiyao: 6764 },
+            { level: 27, expNeed: 7290, yunmu: 0, wujin: 16425, jingang: 9490, heiyao: 7665 },
+            { level: 28, expNeed: 7840, yunmu: 0, wujin: 18424, jingang: 10976, heiyao: 9016 },
+            { level: 29, expNeed: 8410, yunmu: 0, wujin: 20580, jingang: 12600, heiyao: 10500 },
+            { level: 30, expNeed: 9000, yunmu: 0, wujin: 21879, jingang: 13728, heiyao: 11583 },
+            { level: 31, expNeed: 9610, yunmu: 0, wujin: 24221, jingang: 15538, heiyao: 13253 },
+            { level: 32, expNeed: 10240, yunmu: 0, wujin: 26840, jingang: 17568, heiyao: 15128 },
+            { level: 33, expNeed: 10890, yunmu: 0, wujin: 28215, jingang: 18810, heiyao: 16335 },
+            { level: 34, expNeed: 11560, yunmu: 0, wujin: 31034, jingang: 21040, heiyao: 18410 },
+            { level: 35, expNeed: 12250, yunmu: 0, wujin: 33916, jingang: 23352, heiyao: 20572 },
+            { level: 36, expNeed: 12960, yunmu: 0, wujin: 35532, jingang: 24816, heiyao: 21996 },
+            { level: 37, expNeed: 13690, yunmu: 0, wujin: 38675, jingang: 27370, heiyao: 24395 },
+            { level: 38, expNeed: 14440, yunmu: 0, wujin: 42076, jingang: 30144, heiyao: 27004 },
+            { level: 39, expNeed: 15210, yunmu: 0, wujin: 43746, jingang: 31700, heiyao: 28530 },
+            { level: 40, expNeed: 16000, yunmu: 0, wujin: 47286, jingang: 34632, heiyao: 31302 },
+            { level: 41, expNeed: 16810, yunmu: 0, wujin: 51173, jingang: 37854, heiyao: 34349 },
+            { level: 42, expNeed: 17640, yunmu: 0, wujin: 52875, jingang: 39480, heiyao: 35955 },
+            { level: 43, expNeed: 18490, yunmu: 0, wujin: 56980, jingang: 42920, heiyao: 39220 },
+            { level: 44, expNeed: 19360, yunmu: 0, wujin: 61146, jingang: 46440, heiyao: 42570 },
+            { level: 45, expNeed: 46820, yunmu: 0, wujin: 145881, jingang: 111662, heiyao: 102657 },
+            { level: 46, expNeed: 18490, yunmu: 0, wujin: 59013, jingang: 45504, heiyao: 41949 },
+            { level: 47, expNeed: 18490, yunmu: 0, wujin: 60435, jingang: 46926, heiyao: 43371 },
+            { level: 48, expNeed: 18490, yunmu: 0, wujin: 59595, jingang: 46580, heiyao: 43155 },
+            { level: 49, expNeed: 18490, yunmu: 0, wujin: 60965, jingang: 47950, heiyao: 44525 },
+            { level: 50, expNeed: 18490, yunmu: 0, wujin: 62335, jingang: 49320, heiyao: 45895 },
+            { level: 51, expNeed: 18490, yunmu: 0, wujin: 61380, jingang: 48840, heiyao: 45540 },
+            { level: 52, expNeed: 18490, yunmu: 0, wujin: 62795, jingang: 50236, heiyao: 46931 },
+            { level: 53, expNeed: 18490, yunmu: 0, wujin: 64020, jingang: 51480, heiyao: 48180 },
+            { level: 54, expNeed: 18490, yunmu: 0, wujin: 63162, jingang: 51040, heiyao: 47850 },
+            { level: 55, expNeed: 18490, yunmu: 0, wujin: 64337, jingang: 52234, heiyao: 49049 },
+            { level: 56, expNeed: 18490, yunmu: 0, wujin: 65714, jingang: 53592, heiyao: 50402 },
+            { level: 57, expNeed: 18490, yunmu: 0, wujin: 64680, jingang: 52976, heiyao: 49896 },
+            { level: 58, expNeed: 18490, yunmu: 0, wujin: 65912, jingang: 54208, heiyao: 51128 },
+            { level: 59, expNeed: 18490, yunmu: 0, wujin: 67253, jingang: 55530, heiyao: 52445 }
+        ];
+const advisorData = [
+            { level: 1, upExp: 20, yangyan: 4, changsheng: 0, shengren: 0 },
+            { level: 2, upExp: 30, yangyan: 4, changsheng: 0, shengren: 0 },
+            { level: 3, upExp: 60, yangyan: 24, changsheng: 0, shengren: 0 },
+            { level: 4, upExp: 110, yangyan: 48, changsheng: 0, shengren: 0 },
+            { level: 5, upExp: 180, yangyan: 110, changsheng: 0, shengren: 0 },
+            { level: 6, upExp: 270, yangyan: 192, changsheng: 64, shengren: 0 },
+            { level: 7, upExp: 380, yangyan: 294, changsheng: 126, shengren: 0 },
+            { level: 8, upExp: 510, yangyan: 448, changsheng: 224, shengren: 0 },
+            { level: 9, upExp: 660, yangyan: 666, changsheng: 370, shengren: 0 },
+            { level: 10, upExp: 830, yangyan: 920, changsheng: 552, shengren: 0 },
+            { level: 11, upExp: 1020, yangyan: 1254, changsheng: 798, shengren: 0 },
+            { level: 12, upExp: 1230, yangyan: 1632, changsheng: 1088, shengren: 408 },
+            { level: 13, upExp: 1460, yangyan: 2106, changsheng: 1458, shengren: 648 },
+            { level: 14, upExp: 1710, yangyan: 2520, changsheng: 1800, shengren: 900 },
+            { level: 15, upExp: 1980, yangyan: 3120, changsheng: 2288, shengren: 1248 },
+            { level: 16, upExp: 2270, yangyan: 3840, changsheng: 2880, shengren: 1680 },
+            { level: 17, upExp: 2580, yangyan: 4624, changsheng: 3536, shengren: 2176 },
+            { level: 18, upExp: 2910, yangyan: 5508, changsheng: 4284, shengren: 2754 },
+            { level: 19, upExp: 3260, yangyan: 6194, changsheng: 4890, shengren: 3256 },
+            { level: 20, upExp: 3260, yangyan: 6520, changsheng: 5216, shengren: 3580 },
+            { level: 21, upExp: 3630, yangyan: 7602, changsheng: 6154, shengren: 4344 },
+            { level: 22, upExp: 4020, yangyan: 8844, changsheng: 7236, shengren: 5226 },
+            { level: 23, upExp: 4430, yangyan: 10212, changsheng: 8436, shengren: 6216 },
+            { level: 24, upExp: 4860, yangyan: 11664, changsheng: 9720, shengren: 7290 },
+            { level: 25, upExp: 5310, yangyan: 12650, changsheng: 10626, shengren: 8096 },
+            { level: 26, upExp: 5780, yangyan: 14300, changsheng: 12100, shengren: 9350 },
+            { level: 27, upExp: 6270, yangyan: 16146, changsheng: 13754, shengren: 10764 },
+            { level: 28, upExp: 6780, yangyan: 18032, changsheng: 15456, shengren: 12236 },
+            { level: 29, upExp: 7310, yangyan: 20242, changsheng: 17450, shengren: 13960 },
+            { level: 30, upExp: 7930, yangyan: 23760, changsheng: 19440, shengren: 15120 },
+            { level: 31, upExp: 8580, yangyan: 28860, changsheng: 22620, shengren: 17160 },
+            { level: 32, upExp: 9280, yangyan: 34604, changsheng: 26164, shengren: 19412 },
+            { level: 33, upExp: 10030, yangyan: 41040, changsheng: 30096, shengren: 21888 },
+            { level: 34, upExp: 10830, yangyan: 48216, changsheng: 34440, shengren: 24600 },
+            { level: 35, upExp: 11680, yangyan: 56286, changsheng: 39294, shengren: 27612 },
+            { level: 36, upExp: 12580, yangyan: 65208, changsheng: 44616, shengren: 30888 },
+            { level: 37, upExp: 13530, yangyan: 75030, changsheng: 50430, shengren: 34440 },
+            { level: 38, upExp: 14530, yangyan: 85800, changsheng: 56760, shengren: 38280 },
+            { level: 39, upExp: 15630, yangyan: 98118, changsheng: 63990, shengren: 42660 },
+            { level: 40, upExp: 16830, yangyan: 106726, changsheng: 68714, shengren: 45322 },
+            { level: 41, upExp: 18130, yangyan: 121506, changsheng: 77322, shengren: 50496 },
+            { level: 42, upExp: 19530, yangyan: 137538, changsheng: 86598, shengren: 56034 },
+            { level: 43, upExp: 21030, yangyan: 155380, changsheng: 96884, shengren: 62152 },
+            { level: 44, upExp: 22630, yangyan: 175152, changsheng: 108240, shengren: 68880 },
+            { level: 45, upExp: 24280, yangyan: 196416, changsheng: 120384, shengren: 76032 },
+            { level: 46, upExp: 25980, yangyan: 201760, changsheng: 122720, shengren: 76960 },
+            { level: 47, upExp: 25980, yangyan: 210080, changsheng: 126880, shengren: 78736 },
+            { level: 48, upExp: 27780, yangyan: 233520, changsheng: 140112, shengren: 86736 },
+            { level: 49, upExp: 27780, yangyan: 242416, changsheng: 144560, shengren: 88960 },
+            { level: 50, upExp: 29680, yangyan: 248600, changsheng: 147400, shengren: 90200 },
+            { level: 51, upExp: 29680, yangyan: 257400, changsheng: 151800, shengren: 92400 },
+            { level: 52, upExp: 31680, yangyan: 284108, changsheng: 166708, shengren: 100964 },
+            { level: 53, upExp: 31680, yangyan: 293500, changsheng: 171404, shengren: 103312 },
+            { level: 54, upExp: 33780, yangyan: 297216, changsheng: 172800, shengren: 103680 },
+            { level: 55, upExp: 33780, yangyan: 321062, changsheng: 185878, shengren: 111044 },
+            { level: 56, upExp: 35980, yangyan: 352090, changsheng: 203030, shengren: 120790 },
+            { level: 57, upExp: 35980, yangyan: 362370, changsheng: 208170, shengren: 123360 },
+            { level: 58, upExp: 38280, yangyan: 396720, changsheng: 227088, shengren: 134064 },
+            { level: 59, upExp: 40680, yangyan: 432994, changsheng: 247010, shengren: 145300 }
+        ];
+const altarData = [
+            { level: 1, totalMaterial: 9, expMin: 0, expMax: 30, times: 3 },
+            { level: 2, totalMaterial: 24, expMin: 30, expMax: 70, times: 4 },
+            { level: 3, totalMaterial: 45, expMin: 70, expMax: 120, times: 5 },
+            { level: 4, totalMaterial: 72, expMin: 120, expMax: 180, times: 6 },
+            { level: 5, totalMaterial: 105, expMin: 180, expMax: 250, times: 7 },
+            { level: 6, totalMaterial: 144, expMin: 250, expMax: 330, times: 8 },
+            { level: 7, totalMaterial: 189, expMin: 330, expMax: 420, times: 9 },
+            { level: 8, totalMaterial: 240, expMin: 420, expMax: 520, times: 10 },
+            { level: 9, totalMaterial: 297, expMin: 520, expMax: 630, times: 11 },
+            { level: 10, totalMaterial: 360, expMin: 630, expMax: 750, times: 12 },
+            { level: 11, totalMaterial: 429, expMin: 750, expMax: 880, times: 13 },
+            { level: 12, totalMaterial: 504, expMin: 880, expMax: 1020, times: 14 },
+            { level: 13, totalMaterial: 585, expMin: 1020, expMax: 1170, times: 15 },
+            { level: 14, totalMaterial: 672, expMin: 1170, expMax: 1330, times: 16 },
+            { level: 15, totalMaterial: 765, expMin: 1330, expMax: 1500, times: 17 },
+            { level: 16, totalMaterial: 864, expMin: 1500, expMax: 1680, times: 18 },
+            { level: 17, totalMaterial: 969, expMin: 1680, expMax: 1870, times: 19 },
+            { level: 18, totalMaterial: 1080, expMin: 1870, expMax: 2070, times: 20 },
+            { level: 19, totalMaterial: 1197, expMin: 2070, expMax: 2280, times: 21 },
+            { level: 20, totalMaterial: 1320, expMin: 2280, expMax: 2500, times: 22 },
+            { level: 21, totalMaterial: 1449, expMin: 2500, expMax: 2730, times: 23 },
+            { level: 22, totalMaterial: 1584, expMin: 2730, expMax: 2970, times: 24 },
+            { level: 23, totalMaterial: 1725, expMin: 2970, expMax: 3220, times: 25 },
+            { level: 24, totalMaterial: 1872, expMin: 3220, expMax: 3480, times: 26 },
+            { level: 25, totalMaterial: 2025, expMin: 3480, expMax: 3750, times: 27 },
+            { level: 26, totalMaterial: 2184, expMin: 3750, expMax: 4030, times: 28 },
+            { level: 27, totalMaterial: 2349, expMin: 4030, expMax: 4320, times: 29 },
+            { level: 28, totalMaterial: 2520, expMin: 4320, expMax: 4620, times: 30 },
+            { level: 29, totalMaterial: 2679, expMin: 4620, expMax: 4930, times: 31 },
+            { level: 30, totalMaterial: 2880, expMin: 4930, expMax: 5250, times: 32 },
+            { level: 31, totalMaterial: 3162, expMin: 5250, expMax: 5590, times: 34 },
+            { level: 32, totalMaterial: 3360, expMin: 5590, expMax: 5940, times: 35 },
+            { level: 33, totalMaterial: 3564, expMin: 5940, expMax: 6300, times: 36 },
+            { level: 34, totalMaterial: 3774, expMin: 6300, expMax: 6670, times: 37 },
+            { level: 35, totalMaterial: 3990, expMin: 6670, expMax: 7050, times: 38 },
+            { level: 36, totalMaterial: 4212, expMin: 7050, expMax: 7440, times: 39 },
+            { level: 37, totalMaterial: 4440, expMin: 7440, expMax: 7840, times: 40 },
+            { level: 38, totalMaterial: 4674, expMin: 7840, expMax: 8250, times: 41 },
+            { level: 39, totalMaterial: 4914, expMin: 8250, expMax: 8670, times: 42 },
+            { level: 40, totalMaterial: 5160, expMin: 8670, expMax: 9100, times: 43 },
+            { level: 41, totalMaterial: 5412, expMin: 9100, expMax: 9540, times: 44 },
+            { level: 42, totalMaterial: 5670, expMin: 9540, expMax: 9990, times: 45 },
+            { level: 43, totalMaterial: 5934, expMin: 9990, expMax: 10450, times: 46 },
+            { level: 44, totalMaterial: 6204, expMin: 10450, expMax: 10920, times: 47 },
+            { level: 45, totalMaterial: 6480, expMin: 10920, expMax: 11400, times: 48 },
+            { level: 46, totalMaterial: 6762, expMin: 11400, expMax: 11890, times: 49 },
+            { level: 47, totalMaterial: 7050, expMin: 11890, expMax: 12390, times: 50 },
+            { level: 48, totalMaterial: 7344, expMin: 12390, expMax: 12900, times: 51 },
+            { level: 49, totalMaterial: 7644, expMin: 12900, expMax: 13420, times: 52 },
+            { level: 50, totalMaterial: 8400, expMin: 13420, expMax: 13980, times: 56 },
+            { level: 51, totalMaterial: 8990, expMin: 13980, expMax: 14560, times: 58 },
+            { level: 52, totalMaterial: 9600, expMin: 14560, expMax: 15160, times: 60 },
+            { level: 53, totalMaterial: 10395, expMin: 15160, expMax: 15790, times: 63 },
+            { level: 54, totalMaterial: 11220, expMin: 15790, expMax: 16450, times: 66 },
+            { level: 55, totalMaterial: 12075, expMin: 16450, expMax: 17140, times: 69 },
+            { level: 56, totalMaterial: 13104, expMin: 17140, expMax: 17860, times: 72 },
+            { level: 57, totalMaterial: 14175, expMin: 17860, expMax: 18610, times: 75 },
+            { level: 58, totalMaterial: 15288, expMin: 18610, expMax: 19390, times: 78 },
+            { level: 59, totalMaterial: 16443, expMin: 19390, expMax: 20200, times: 81 },
+            { level: 60, totalMaterial: 17640, expMin: 20200, expMax: 21040, times: 84 },
+            { level: 61, totalMaterial: 19053, expMin: 21040, expMax: 21910, times: 87 },
+            { level: 62, totalMaterial: 20520, expMin: 21910, expMax: 22810, times: 90 },
+            { level: 63, totalMaterial: 22278, expMin: 22810, expMax: 23750, times: 94 },
+            { level: 64, totalMaterial: 24108, expMin: 23750, expMax: 24730, times: 98 },
+            { level: 65, totalMaterial: 26010, expMin: 24730, expMax: 25750, times: 102 },
+            { level: 66, totalMaterial: 27664, expMin: 25750, expMax: 26810, times: 106 },
+            { level: 67, totalMaterial: 30470, expMin: 26810, expMax: 27910, times: 110 },
+            { level: 68, totalMaterial: 33120, expMin: 27910, expMax: 29060, times: 115 },
+            { level: 69, totalMaterial: 35880, expMin: 29060, expMax: 30260, times: 120 },
+            { level: 70, totalMaterial: 37200, expMin: 30260, expMax: 31460, times: 120 },
+            { level: 71, totalMaterial: 44940, expMin: 31460, expMax: 32860, times: 140 },
+            { level: 72, totalMaterial: 48140, expMin: 32860, expMax: 34310, times: 145 },
+            { level: 73, totalMaterial: 51450, expMin: 34310, expMax: 35810, times: 150 },
+            { level: 74, totalMaterial: 54870, expMin: 35810, expMax: 37360, times: 155 },
+            { level: 75, totalMaterial: 58400, expMin: 37360, expMax: 38960, times: 160 },
+            { level: 76, totalMaterial: 62040, expMin: 38960, expMax: 40610, times: 165 },
+            { level: 77, totalMaterial: 65790, expMin: 40610, expMax: 42310, times: 170 },
+            { level: 78, totalMaterial: 69650, expMin: 42310, expMax: 44060, times: 175 },
+            { level: 79, totalMaterial: 73620, expMin: 44060, expMax: 45860, times: 180 },
+            { level: 80, totalMaterial: 79800, expMin: 45860, expMax: 47760, times: 190 },
+            { level: 81, totalMaterial: 86200, expMin: 47760, expMax: 49760, times: 200 },
+            { level: 82, totalMaterial: 92820, expMin: 49760, expMax: 51860, times: 210 },
+            { level: 83, totalMaterial: 99660, expMin: 51860, expMax: 54060, times: 220 },
+            { level: 84, totalMaterial: 106720, expMin: 54060, expMax: 56360, times: 230 },
+            { level: 85, totalMaterial: 116375, expMin: 56360, expMax: 58810, times: 245 },
+            { level: 86, totalMaterial: 126360, expMin: 58810, expMax: 61410, times: 260 },
+            { level: 87, totalMaterial: 136675, expMin: 61410, expMax: 64160, times: 275 },
+            { level: 88, totalMaterial: 147320, expMin: 64160, expMax: 67060, times: 290 },
+            { level: 89, totalMaterial: 158295, expMin: 67060, expMax: 70110, times: 305 }
+        ];
+
+const SYS = {
+  beast: { max:80, expKey:'upExp', mats:[['grass','灵草'],['wood','灵木'],['pill','灵丹']], rows:beastLevelData },
+  armor: { max:60, expKey:'expNeed', mats:[['yunmu','云母石'],['wujin','乌金石'],['jingang','金刚石'],['heiyao','黑曜石']], rows:armorData },
+  advisor: { max:60, expKey:'upExp', mats:[['yangyan','阳炎符'],['changsheng','长生符'],['shengren','圣人符']], rows:advisorData },
+  altar: { max:90, expKey:null, mats:[['totalMaterial','祭坛材料']], rows:altarData }
+};
+const fmt = (n) => (Math.round(n)).toLocaleString('en-US');
+
+function readNum(id){ const el = document.getElementById(id); return Math.max(0, Math.floor(Number(el && el.value) || 0)); }
+
+function simulate(sys){
+  const S = SYS[sys];
+  const cur = Math.min(S.max, Math.max(1, readNum(sys + '-level')));
+  const curExp = readNum(sys + '-exp');
+  let expPool = readNum(sys + '-expool');
+  const stock = {};
+  for (const [k] of S.mats) stock[k] = readNum(sys + '-' + k);
+  const multiplier = sys === 'advisor' ? Math.max(1, Math.min(3, Number(document.getElementById('advisor-mode')?.value) || 1)) : 1;
+
+  const costOf = (level) => {
+    const row = S.rows.find((r) => r.level === level) || {};
+    const costs = {};
+    let total = 0;
+    for (const [k] of S.mats) {
+      const per = Number(row[k] || 0) * multiplier;
+      costs[k] = per;
+      total += per;
+    }
+    return { row, costs, total };
+  };
+  const expOf = (level) => {
+    const row = S.rows.find((r) => r.level === level) || {};
+    return S.expKey ? Number(row[S.expKey] || 0) : 0;
+  };
+
+  let level = cur;
+  let needExp = Math.max(0, expOf(level) - curExp);
+  let consumedExp = 0;
+  const consumedMats = {};
+  for (const [k] of S.mats) consumedMats[k] = 0;
+  let blocked = '';
+
+  const tryOne = () => {
+    const c = costOf(level);
+    if (S.expKey && expPool < needExp) { blocked = '经验不够（还差 ' + fmt(needExp - expPool) + '）'; return false; }
+    for (const [k] of S.mats) if (stock[k] < c.costs[k]) { blocked = '材料不够：' + (S.mats.find((m) => m[0] === k)[1]) + ' 差 ' + fmt(c.costs[k] - stock[k]); return false; }
+    if (S.expKey) { expPool -= needExp; consumedExp += needExp; }
+    for (const [k] of S.mats) { stock[k] -= c.costs[k]; consumedMats[k] += c.costs[k]; }
+    level += 1;
+    needExp = S.expKey ? expOf(level) : 0;
+    return true;
+  };
+
+  // 先把当前等级的经验补齐
+  if (needExp > 0) {
+    if (!tryOne()) {
+      return { cur, level, gained: 0, blocked, next: nextInfo(sys, level, curExp, expPool, stock, multiplier) };
+    }
+  }
+  while (level < S.max) {
+    if (!tryOne()) break;
+  }
+  return {
+    cur, level, gained: level - cur, blocked,
+    consumedExp, consumedMats, leftoverExp: expPool, leftoverMats: stock,
+    next: nextInfo(sys, level, 0, expPool, stock, multiplier)
+  };
+}
+
+function nextInfo(sys, level, curExp, expPool, stock, multiplier){
+  const S = SYS[sys];
+  const row = S.rows.find((r) => r.level === level);
+  if (!row || level >= S.max) return null;
+  const needExp = S.expKey ? Math.max(0, Number(row[S.expKey] || 0) - curExp) : 0;
+  const mats = S.mats.map(([k, name]) => ({ name, need: Number(row[k] || 0) * multiplier, have: stock[k] })).filter((x) => x.need > 0 || x.have > 0);
+  return { level, needExp, expShort: Math.max(0, needExp - expPool), mats };
+}
+
+function render(sys){
+  const r = simulate(sys);
+  const S = SYS[sys];
+  const el = document.getElementById('res-' + sys);
+  const nameOf = (k) => (S.mats.find((m) => m[0] === k) || [k, k])[1];
+  const cards = [];
+  cards.push(['升了几级', '+' + fmt(r.gained)]);
+  if (S.expKey) {
+    cards.push(['用掉经验', fmt(r.consumedExp)]);
+    cards.push(['剩经验', fmt(r.leftoverExp)]);
+  }
+  for (const [k] of S.mats) {
+    if (r.consumedMats && r.consumedMats[k]) cards.push(['用掉' + nameOf(k), fmt(r.consumedMats[k])]);
+    if (r.leftoverMats && r.leftoverMats[k]) cards.push(['剩' + nameOf(k), fmt(r.leftoverMats[k])]);
+  }
+  let hint = '';
+  if (r.next) {
+    const parts = [];
+    if (r.next.needExp) parts.push('经验 ' + fmt(r.next.needExp) + (r.next.expShort ? '（差 ' + fmt(r.next.expShort) + '）' : ''));
+    for (const m of r.next.mats) if (m.need > 0) parts.push(m.name + ' ' + fmt(m.need) + (m.need > m.have ? '（差 ' + fmt(m.need - m.have) + '）' : ''));
+    hint = '再升一级（' + r.next.level + ' → ' + (r.next.level + 1) + '）要：' + parts.join('、');
+  } else {
+    hint = '到顶了，' + S.max + ' 级。';
+  }
+  el.innerHTML =
+    '<div class="big"><span class="num">' + r.level + '</span><span class="unit">级</span></div>' +
+    '<div class="cards">' + cards.map(([k, v]) => '<div class="cell"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>').join('') + '</div>' +
+    '<div class="hint">' + (r.blocked ? '卡在：' + r.blocked + '。' : '') + hint + '</div>';
+}
+
+document.querySelectorAll('.tab').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.sys).classList.add('active');
+  });
+});
+document.querySelectorAll('.calc').forEach((btn) => btn.addEventListener('click', () => render(btn.dataset.calc)));
+document.querySelectorAll('.reset').forEach((btn) => btn.addEventListener('click', () => {
+  const sys = btn.dataset.reset;
+  const S = SYS[sys];
+  document.getElementById(sys + '-level').value = 1;
+  if (S.expKey) { document.getElementById(sys + '-exp').value = 0; document.getElementById(sys + '-expool').value = 0; }
+  for (const [k] of S.mats) document.getElementById(sys + '-' + k).value = 0;
+  document.getElementById('res-' + sys).innerHTML = '';
+}));
+</script>
+</body>
+</html>
