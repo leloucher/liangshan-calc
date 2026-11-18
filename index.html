@@ -154,6 +154,13 @@ select.form-control{font-family:inherit}
   .result-grid{grid-template-columns:repeat(2,1fr)}
 }
 
+
+/* 四个页签：只显示当前那一个（这条以前漏了，手机上就变成一长条） */
+.tab-content{display:none;animation:fadeIn .25s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* 顶栏吸顶，滑到哪都能切 */
+.tab-container{position:sticky;top:0;z-index:50;backdrop-filter:blur(6px)}
 </style>
     <!-- 引入Font Awesome图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -2496,5 +2503,24 @@ select.form-control{font-family:inherit}
     <span>点算司 · 数据取自吧友攻略图</span>
     <span class="stars">★ 天罡 ★ 地煞 ★</span>
 </div>
+
+<script>
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tab-button'));
+  function pick(id){
+    var t=tabs.filter(function(b){return b.getAttribute('data-tab')===id;})[0];
+    if(t){t.click();}
+  }
+  tabs.forEach(function(b){
+    b.addEventListener('click',function(){
+      var id=b.getAttribute('data-tab');
+      if(history.replaceState){history.replaceState(null,'','#'+id);}
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+  window.addEventListener('hashchange',function(){pick(location.hash.slice(1));});
+  if(location.hash){pick(location.hash.slice(1));}
+})();
+</script>
 </body>
 </html>
